@@ -3,6 +3,9 @@ import { redirect } from "@sveltejs/kit";
 export function load({ cookies }) {
 	const toast = cookies.get("toast")
 	const session_raw = cookies.get("session");
+	if (!session_raw) {
+		redirect(303, "/login")
+	}
 	const session = JSON.parse(session_raw);
 	const username = session["login"]
 

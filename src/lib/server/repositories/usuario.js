@@ -39,6 +39,8 @@ export async function buscaPorLoginBD(login) {
 export async function loginBD(login, password) {
 	const db = getPool()
 	// Get salt from login
+	console.log(login)
+	console.log(DB_INFO.tables.usuario)
 	const saltQuery = {
 		text: `SELECT salt FROM ${DB_INFO.tables.usuario} WHERE login = $1`,
 		values: [login]
@@ -46,6 +48,7 @@ export async function loginBD(login, password) {
 
 	try {
 		const salt = await db.query(saltQuery)
+
 		if (salt.rowCount == 0)
 			return "User not found"
 

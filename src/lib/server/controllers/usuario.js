@@ -10,11 +10,13 @@ export default class UsuarioController {
 		if (!nome || !login || !password || !instituicao || !dtNasc || !email) {
 			throw ("Dados obrigatórios não foram preenchidos.")
 		}
-
-		if (await this.buscaPorLogin(login)) {
+		
+		const hasUser = await this.buscaPorLogin(login) 
+		if (hasUser.id) {
+			console.log("Tem usuário", hasUser.id)
 			throw ("Já existe usuário com o mesmo login cadastrado.")
 		}
-
+		
 		const instituicaoRes = await instituicaoController.buscaPorNome(instituicao);
 		const idInstituicao = instituicaoRes.id
 		const nivelInicial = 0
@@ -23,8 +25,12 @@ export default class UsuarioController {
 		dataCriacao = dataCriacao.toISOString()
 		let ultimoAcesso = dataCriacao
 		let salt = bcrypt.genSaltSync(10)
+		password = password.trim()
 		let hash = bcrypt.hashSync(password, salt)
-
+		nome = nome.trim()
+		login = login.trim()
+		email = email.trim()
+		matricula_aluno = matricula_aluno.trim()
 		try {
 			let res = await registraUsuarioBD(nome, login, hash, salt, idInstituicao, dtNasc, bio, email, matricula_aluno, nivelInicial, acumuloXpInicial, dataCriacao, ultimoAcesso, cor)
 
@@ -47,6 +53,7 @@ export default class UsuarioController {
 
 		const res = await loginBD(login, password)
 
+		console.log(res)
 		if (res.rowCount) {
 			return res.rows[0]
 		}
@@ -59,7 +66,7 @@ export default class UsuarioController {
 
 	async buscaPorLogin(login) {
 		const res = await buscaPorLoginBD(login);
-
+		console.log(res)
 		return new Usuario({ ...res });
 	}
 
