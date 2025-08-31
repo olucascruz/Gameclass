@@ -19,7 +19,7 @@
 			let label = part;
 
 			if (i == 2) {
-				label = session.turma.nome;
+				label = session.turma?.nome ?? "Turma sem nome";
 			}
 
 			if (i == 4 && parts[3] == 'membros') {
