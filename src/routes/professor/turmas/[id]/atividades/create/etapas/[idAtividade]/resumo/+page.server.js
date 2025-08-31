@@ -14,7 +14,7 @@ const grupoController = new GrupoController()
 const integranteGrupoController = new IntegranteGrupoController()
 
 export async function load({ cookies, params }) {
-	const idAtividade = params.id
+	const idAtividade = params.idAtividade
 	const atividade = (await atividadeController.buscaPorId(idAtividade)).toObject()
 
 	return { "atividade": atividade }
@@ -27,7 +27,10 @@ export let actions = {
 
 		let data = await request.formData();
 		let grupos = data.get("grupos")
-		grupos = JSON.parse(grupos)
+		console.log(grupos)
+		if(grupos){
+			grupos = JSON.parse(grupos)
+		}
 		let etapasData = JSON.parse(data.get('etapas'))
 		const etapas = etapasData;
 
