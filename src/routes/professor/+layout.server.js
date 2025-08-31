@@ -16,9 +16,10 @@ const grupoController = new GrupoController()
 const estudanteController = new EstudanteController()
 const entregaController = new EntregaController()
 
-export async function load({ url, cookies }) {
+export async function load({ url, cookies, params }) {
 	const session_raw = cookies.get("session");
 	const parts = url.pathname.split('/').filter(Boolean); // remove vazios
+	console.log("params",params)
 
 	if (!session_raw) {
 		console.log("Usuário não autenticado")
@@ -34,10 +35,12 @@ export async function load({ url, cookies }) {
 	const data = JSON.parse(session_raw);
 	const usuario = await usuarioController.buscaPorLogin(data.login)
 	const turmas = await turmaController.listaPorProfessor(data.id)
+	
+	console.log("PARTES URL",parts)
 
 	// Turma
-	if (parts.length > 2 && parts[2]) {
-		data.turma = await turmaController.buscaPorId(parts[2])
+	if (parts.length == 2 && parts[2] && !isNaN(parts[2])) {
+		data.turma = await turmaController.buscaPorId(params["id"])
 	}
 
 	if (parts[3] && parts[4] && parts[3] == 'membros') {
@@ -47,8 +50,9 @@ export async function load({ url, cookies }) {
 
 	if (parts[4] && parts[4] != 'create' && parts[3] === "atividades") {
 		// Atividade
+		console.log("Part 4", parts[4])
 		if (parts.length > 4) {
-			const atividade = await atividadeController.buscaPorId(parts[4])
+			const atividade = await atividadeController.buscaPorId(params["idAtividade"])
 			data.atividade = atividade.toObject()
 
 		}
