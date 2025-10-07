@@ -1,9 +1,5 @@
 <script>
-	export let placeholder = '';
-	export let value;
-	export let name;
-	export let width;
-	export let borded = false;
+	let { placeholder = '', value = $bindable(), name, width, borded = false, ...rest } = $props();
 </script>
 
 {#if borded}
@@ -14,10 +10,8 @@
 			{name}
 			{placeholder}
 			bind:value
-			on:input
-			on:blur
 			style="width: {width};"
-			{...$$restProps}
+			{...rest}
 		/>
 	</div>
 {:else}
@@ -27,10 +21,8 @@
 		{name}
 		{placeholder}
 		bind:value
-		on:input
-		on:blur
 		style="width: {width};"
-		{...$$restProps}
+		{...rest}
 	/>
 {/if}
 

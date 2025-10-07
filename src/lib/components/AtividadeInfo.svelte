@@ -1,5 +1,5 @@
 <script>
-	export let data;
+	let { data } = $props();
 
 	const keys = Object.keys(data);
 	const values = Object.values(data);
@@ -23,7 +23,8 @@
 		color: #fff;
 		text-align: center;
 		margin: auto;
-		max-width: 50rem;
+		max-width: 80rem;
+		min-width: 50rem;
 	}
 
 	.col {

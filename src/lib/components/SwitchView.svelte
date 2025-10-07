@@ -1,38 +1,41 @@
 <script>
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 
 	/**
-	 * Define a visualização inicial. Pode ser 'lista' ou 'grade'.
-	 * @type {'lista' | 'grade'}
+	 * @typedef {Object} Props
+	 * @property {'lista' | 'grade'} [view]
+	 * @property {string} [preferenceKey] - O nome do cookie a ser salvo.
 	 */
-	export let view = 'grade';
-	export let size = 30;
+
+	/** @type {Props} */
+	let { view = $bindable('grade'), preferenceKey = '' } = $props();
 
 	const dispatch = createEventDispatcher();
 
 	async function selectView(newView) {
 		if (view !== newView) {
 			view = newView;
-			// Dispara um evento 'change' com o novo valor
 			dispatch('change', { value: view });
 		}
 
-		// Envia o novo valor para o backend
+		// Só tenta salvar o cookie se uma chave de preferência foi fornecida
+		if (!preferenceKey) return;
+
 		try {
+			// Envia a chave e o novo valor para o endpoint genérico
 			const response = await fetch('/api/set-cookie', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ newView: view })
+				body: JSON.stringify({ key: preferenceKey, value: view })
 			});
 
 			if (!response.ok) {
 				throw new Error('Falha ao salvar o cookie');
 			}
-			console.log('Cookie salvo com sucesso!');
 		} catch (error) {
-			console.error('Erro ao enviar o valor para o servidor:', error);
+			console.error('Erro ao salvar preferência:', error);
 		}
 	}
 </script>
@@ -43,7 +46,7 @@
 		aria-checked={view === 'lista'}
 		class="option"
 		class:active={view === 'lista'}
-		on:click={() => selectView('lista')}
+		onclick={() => selectView('lista')}
 	>
 		Lista
 	</button>
@@ -52,7 +55,7 @@
 		aria-checked={view === 'grade'}
 		class="option"
 		class:active={view === 'grade'}
-		on:click={() => selectView('grade')}
+		onclick={() => selectView('grade')}
 	>
 		Grade
 	</button>

@@ -12,6 +12,22 @@ export async function cadastraAtividadeBD(titulo, descricao, prazo, id_turma) {
 	return res
 }
 
+export async function atualizaAtividadeBD(id, titulo, descricao, prazo) {
+	const db = getPool()
+	const query = {
+		text: `UPDATE ${DB_INFO.tables.atividade} 
+					SET titulo = $2,
+						descricao = $3,
+						prazo = $4
+					WHERE
+						id = $1`,
+		values: [id, titulo, descricao, prazo]
+	}
+
+	const res = await db.query(query)
+	return res
+}
+
 export async function removeAtividadeBD(titulo, id_turma) {
 	const db = getPool()
 	const query = {
@@ -49,7 +65,7 @@ export async function buscaPorIdBD(id) {
 export async function listaPorIdTurmaBD(idTurma) {
 	const db = getPool()
 	const query = {
-		text: `SELECT * FROM ${DB_INFO.tables.atividade} WHERE id_turma=$1`,
+		text: `SELECT * FROM ${DB_INFO.tables.atividade} WHERE id_turma=$1 AND arquivado = FALSE`,
 		values: [idTurma]
 	}
 
@@ -77,5 +93,22 @@ export async function buscaPorTituloBD(titulo, id_turma) {
 		return res
 	} catch (e) {
 		throw (`Erro ao buscar nova atividade por titulo (${titulo}, id_turma: ${id_turma}): ${e}`)
+	}
+}
+
+export async function arquivarAtividadeBD(idAtividade) {
+	const db = getPool()
+	const query = {
+		text: `UPDATE ${DB_INFO.tables.atividade} 
+					SET arquivado = TRUE
+					WHERE id=$1`,
+		values: [idAtividade]
+	}
+
+	try {
+		const res = await db.query(query)
+		return res
+	} catch (e) {
+		throw (`Erro ao arquivar atividade por id (${idAtividade}: ${e}`)
 	}
 }

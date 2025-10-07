@@ -4,7 +4,7 @@
 	import CircularIcon from './CircularIcon.svelte';
 	import { goto } from '$app/navigation';
 
-	export let session;
+	let { session } = $props();
 
 	// Constrói um array de segmentos da URL atual
 	const segments = derived(page, ($page) => {
@@ -18,15 +18,15 @@
 		return parts.map((part, i) => {
 			let label = part;
 
-			if (i == 2) {
-				label = session.turma?.nome ?? "Turma sem nome";
+			if (i == 2 && parts[2] && parts[2] != 'create') {
+				label = session.turma.nome;
 			}
 
 			if (i == 4 && parts[3] == 'membros') {
 				label = session.estudante.login;
 			}
 
-			if (parts[4] != 'create' && parts[3] == 'atividades') {
+			if (parts[4] != 'create' && parts[3] == 'atividades' && parts[6] == 'edit') {
 				if (i == 4) {
 					label = session.atividade.titulo;
 				}
@@ -69,7 +69,7 @@
 			{/if}
 		{/each}
 	</nav>
-	<button class="logged-user" on:click={onClickUsuario}>
+	<button class="logged-user" onclick={onClickUsuario}>
 		<div class="info">
 			<h4 class="logged-user-name">{session.login}</h4>
 			<p class="logged-user-role">{session.perfil}</p>

@@ -2,32 +2,32 @@
 	import InputText from '$lib/components/InputText.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Select from '$lib/components/Select.svelte';
+	import SelectSearch from '$lib/components/SelectSearch.svelte';
 	import { enhance } from '$app/forms';
 
-	export let data;
-	export let form;
+	let { data, form = $bindable() } = $props();
 
-	let codigo,
-		disciplina,
-		nome,
-		descricao,
-		ano,
-		periodo,
-		local,
-		instituicao = '';
+	let codigo = $state(),
+		disciplina = $state(),
+		nome = $state(),
+		descricao = $state(),
+		ano = $state(),
+		periodo = $state(),
+		local = $state(),
+		instituicao = $state('');
 
-	let codigoEmpty,
-		disciplinaEmpty,
-		nomeEmpty,
-		descricaoEmpty,
-		anoEmpty,
-		periodoEmpty,
-		localEmpty,
-		instituicaoEmpty = false;
+	let codigoEmpty = $state(),
+		disciplinaEmpty = $state(),
+		nomeEmpty = $state(),
+		descricaoEmpty = $state(),
+		anoEmpty = $state(),
+		periodoEmpty = $state(),
+		localEmpty = $state(),
+		instituicaoEmpty = $state(false);
 
 	let selectOptionDict = data['instituicoes'];
 	let selectOptionList = selectOptionDict.map((instituicao) => instituicao.nome);
-	let anoOptionList = [2024, 2023, 2022]; // TODO: Automatizar lista
+	let anoOptionList = gerarListaDeAnos(20);
 	let periodoOptionList = [1, 2];
 
 	function checkInputs() {
@@ -117,6 +117,17 @@
 
 		return true;
 	}
+
+	function gerarListaDeAnos(quantidade) {
+		const anoAtual = new Date().getFullYear();
+		const listaDeAnos = [];
+
+		for (let i = 0; i < quantidade; i++) {
+			listaDeAnos.push(anoAtual + i);
+		}
+
+		return listaDeAnos;
+	}
 </script>
 
 <div class="form-container">
@@ -201,7 +212,6 @@
 		<div class="row">
 			<h2>Ano letivo:</h2>
 			<div style="display:flex; flex-direction: column;">
-				<!-- <InputText borded name="ano" bind:value={ano} inputHandler={anoInputHandler} /> -->
 				<Select
 					borded
 					name="ano"
@@ -237,10 +247,10 @@
 		<div class="row">
 			<h2>Instituição:</h2>
 			<div style="display:flex; flex-direction: column;">
-				<Select
+				<SelectSearch
 					borded
 					name="instituicao"
-					unselectedText="--Selecione sua Instituição--"
+					placeholder="Selecione sua Instituição"
 					optionList={selectOptionList}
 					inputHandler={instituicaoInputHandler}
 					bind:value={instituicao}
@@ -262,7 +272,6 @@
 			>
 		{/if}
 
-		<!-- TODO: Fazer botão aparecer -->
 		<div class="row" style="align-self: center;">
 			<Button backgroundColor="var(--cor-secundaria)" color="var(--cor-primaria)"
 				>Criar Turma</Button

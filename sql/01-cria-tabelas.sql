@@ -9,21 +9,19 @@ CREATE TABLE instituicao (
 );
 
 CREATE TABLE usuario (
-    "id" BIGSERIAL UNIQUE,
+	"id" BIGSERIAL UNIQUE,
 	"nome" VARCHAR(100) NOT NULL,
-    "login" VARCHAR(100) NOT NULL, -- TODO: Rename login -> nickname 
-    "hash" VARCHAR(255) NOT NULL,-- TODO: Rename hash -> senha_hash 
-    "salt" VARCHAR(255) NOT NULL,
+	"login" VARCHAR(100) NOT NULL, -- TODO: Rename login -> nickname 
+	"hash" VARCHAR(255) NOT NULL,-- TODO: Rename hash -> senha_hash 
+	"salt" VARCHAR(255) NOT NULL,
 	"bio" VARCHAR(100),
 	"email" VARCHAR(100) NOT NULL,
 	"acumulo_xp" INT NOT NULL,
 	"nivel" INT NOT NULL,
-	"matricula_aluno" VARCHAR(12) NOT NULL,-- TODO: Renomear no diagrama
 	"dt_nasc" DATE NOT NULL,-- TODO: Rename dt_nasc -> data_nascimento 
 	"data_criacao" DATE NOT NULL,
 	"ultimo_acesso" TIMESTAMP NOT NULL, 
 	"cor" varchar(6) NOT NULL, 
-	"id_instituicao" BIGINT REFERENCES instituicao(id),
 	PRIMARY KEY ("id")
 );
 
@@ -67,6 +65,7 @@ CREATE TABLE atividade (
 	"titulo" VARCHAR(255) NOT NULL,
 	"descricao" TEXT,
 	"prazo" TIMESTAMP NOT NULL,
+	"arquivado" BOOLEAN NOT NULL DEFAULT FALSE,
 	"id_turma" BIGINT REFERENCES turma(id) NOT NULL,
 	PRIMARY KEY ("titulo", "id_turma")
 );
@@ -83,7 +82,7 @@ CREATE TABLE item_atividade (
 	"em_grupos" BOOLEAN NOT NULL, -- TODO: Mudar nome no diagrama MER
 	"receber_apos_prazo" BOOLEAN NOT NULL,
 	"tipo_formacao_grupo" SMALLINT NULL,
-	"status" varchar(20),
+	"arquivado" BOOLEAN NOT NULL DEFAULT FALSE,
 	"id_atividade" BIGINT REFERENCES atividade(id) NOT NULL,
 	PRIMARY KEY ("titulo", "id_atividade")
 );
@@ -102,6 +101,7 @@ CREATE TABLE criterio (
 	"descricao" VARCHAR(255) NOT NULL,
 	"pontuacao_max" FLOAT NOT NULL,
 	"peso" FLOAT ,
+	"copias" INT DEFAULT 0,
 	"id_item_atividade" BIGINT REFERENCES item_atividade(id) NOT NULL,
 	PRIMARY KEY ("id")
 );
@@ -157,7 +157,7 @@ CREATE TABLE integrante_grupo_de_alunos (
 
 CREATE TABLE publicacao_mural (
 	"id" BIGSERIAL UNIQUE,
-	"conteudo" VARCHAR(255) NOT NULL,
+	"conteudo" TEXT NOT NULL,
 	"data_publicacao" TIMESTAMP NOT NULL DEFAULT NOW(),
 	"id_turma" BIGINT REFERENCES turma(id) NOT NULL,
 	"id_usuario" BIGINT REFERENCES usuario(id) NOT NULL,
@@ -215,3 +215,29 @@ CREATE TABLE pontuacao (
 	"id_turma" BIGINT REFERENCES turma(id) NOT NULL,
 	PRIMARY KEY ("id")
 );
+
+CREATE TABLE conquista (
+	"id" BIGSERIAL UNIQUE,
+	"nome" VARCHAR(100) NOT NULL UNIQUE,
+	"descricao" TEXT NOT NULL,
+	"emblema_url" VARCHAR(255) NOT NULL,
+	"pontos_xp" INT NOT NULL DEFAULT 0,
+	PRIMARY KEY ("id")
+);
+
+CREATE TABLE conquista_estudante (
+	"id" BIGSERIAL UNIQUE,
+	"data_conquista" TIMESTAMP NOT NULL DEFAULT NOW(),
+	"id_estudante" BIGINT REFERENCES estudante(id) NOT NULL,
+	"id_conquista" BIGINT REFERENCES conquista(id) NOT NULL,
+	"id_turma" BIGINT REFERENCES turma(id),
+	CONSTRAINT uq_estudante_conquista_turma UNIQUE (id_estudante, id_conquista, id_turma),
+	PRIMARY KEY ("id")
+);
+
+CREATE TABLE config (
+	"chave" VARCHAR(255) NOT NULL,
+	"valor" VARCHAR(255) NOT NULL,
+	PRIMARY KEY ("chave")
+);
+

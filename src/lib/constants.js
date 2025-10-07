@@ -34,7 +34,10 @@ export const DB_INFO = {
 		formacaoGrupo: "formacao_grupo",
 		grupo: "grupo_de_alunos",
 		integrante_grupo: "integrante_grupo_de_alunos",
-		avaliacao_integrante_criterio: "avaliacao_integrante_criterio"
+		avaliacao_integrante_criterio: "avaliacao_integrante_criterio",
+		conquista: "conquista",
+		conquista_estudante: "conquista_estudante",
+		config: "config"
 	}
 }
 
@@ -143,5 +146,9 @@ export const FORMACAO_GRUPO = {
 export const PERFIL = {
 	professor: 0,
 	estudante: 1
+}
+
+export const CONFIG = {
+	max_etapas: "MAX_ETAPAS_POR_ATIVIDADE"
 }
 

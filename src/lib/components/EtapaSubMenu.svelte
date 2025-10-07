@@ -1,18 +1,22 @@
 <script>
 	import ButtonRedirect from './ButtonRedirect.svelte';
+	import Button from './Button.svelte';
 	import IconeInformacao from './IconeInformacao.svelte';
 	import CircularIcon from './CircularIcon.svelte';
 	import ItemAtividade from '$lib/models/ItemAtividade.js';
 	import { page } from '$app/state';
 	import { STATUS_ITEM_ATIVIDADE } from '../constants';
+	import { ArchiveIcon, EditIcon, EyeIcon } from 'svelte-feather-icons';
+	import Modal from '$lib/components/Modal.svelte';
 
-	export let itemAtividade;
-	export let idAtividade;
+	let { itemAtividade, idAtividade } = $props();
+	let showModal = $state(false);
+	let itemParaArquivar = $state();
 
 	itemAtividade = new ItemAtividade(itemAtividade);
 
 	// Props
-	let titulo = itemAtividade.titulo;
+	let titulo = $state(itemAtividade.titulo);
 	let status = itemAtividade.status;
 
 	// calculated variables
@@ -22,16 +26,68 @@
 		0: 'pendente',
 		1: 'agendado',
 		2: 'lancado',
-		'Aguardando Correção': 'aguardando_correcao',
-		3: 'corrigido'
+		3: 'aguardando_correcao',
+		4: 'corrigido'
 	};
+
+	async function confirmaModalArquivarItemAtividade() {
+		console.debug('Arquiva item atividade ' + itemParaArquivar);
+		try {
+			const response = await fetch(`/api/item_atividade/${itemParaArquivar}/arquivar`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
+				throw new Error(errorData.message || `Erro ${response.status}: Falha ao arquivar o item.`);
+			}
+		} catch (error) {
+			console.error('Erro ao arquivar atividade:', error);
+		}
+
+		window.location.reload();
+		showModal = false;
+	}
+
+	function handleArquivaItemAtividade(item) {
+		showModal = true;
+		itemParaArquivar = item;
+	}
 </script>
 
+<Modal
+	visible={showModal}
+	title="Atenção"
+	message="Deseja realmente arquivar o item?"
+	buttons={[
+		{
+			label: 'Sim',
+			onClick: async () => {
+				await confirmaModalArquivarItemAtividade();
+			},
+			color: 'green'
+		},
+		{
+			label: 'Não',
+			onClick: () => {
+				showModal = false;
+			},
+			color: 'red'
+		}
+	]}
+/>
 <div class="etapa">
 	<CircularIcon backgroundColor="var(--cor-secundaria)" type="text" text={iconText} />
 	<div class="titulo-etapa">
-		<h3>{titulo}</h3>
-		<IconeInformacao text="Título da etapa da atividade" alt="mais informações" />
+		<div class="titulo-etapa-col">
+			<h3>{titulo}</h3>
+			<h5>
+				Avaliação: <b>{itemAtividade.tipo_avaliacao_nota == 1 ? 'Inidividual' : 'Em grupos'}</b>
+			</h5>
+		</div>
 	</div>
 	<div class="column info">
 		<span class="prazo">Prazo: {itemAtividade.formataDataFinal()}</span>
@@ -39,15 +95,28 @@
 			<h3 class="status-text-{STATUS_ID[status]}">
 				{#if page.url.pathname.includes('professor')}
 					{STATUS_ITEM_ATIVIDADE.professor[status]}
+					{STATUS_ITEM_ATIVIDADE.professor[status] == 'Agendado'
+						? `(${itemAtividade.formataDataInicial()})`
+						: ''}
 				{:else}
 					{STATUS_ITEM_ATIVIDADE.estudante[status]}
 				{/if}
 			</h3>
 		</div>
 	</div>
-	<ButtonRedirect href="atividades/{idAtividade}/{itemAtividade.id}" color="white"
-		>Visualizar</ButtonRedirect
-	>
+	<div class="botoes">
+		<ButtonRedirect href="atividades/{idAtividade}/{itemAtividade.id}" color="white"
+			><EyeIcon size="24" /></ButtonRedirect
+		>
+		<ButtonRedirect href="atividades/{idAtividade}/{itemAtividade.id}/edit" color="white"
+			><EditIcon size="24" /></ButtonRedirect
+		>
+		<Button
+			backgroundColor="var(--cor-secundaria)"
+			on:click={() => handleArquivaItemAtividade(itemAtividade.id)}
+			color="white"><ArchiveIcon size="24" /></Button
+		>
+	</div>
 </div>
 
 <style>
@@ -71,12 +140,22 @@
 		display: flex;
 	}
 
-	.titulo-etapa > h3 {
+	.titulo-etapa-col {
 		margin-right: 8px;
 		margin-left: 8px;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.titulo-etapa-col > h3 {
 		word-wrap: break-word;
 		display: inline-block;
 		white-space: normal;
+	}
+
+	.titulo-etapa-col > h5 {
+		font-weight: 400;
+		font-size: 16px;
 	}
 
 	.column .info {
@@ -88,6 +167,10 @@
 		width: 100%;
 		display: flex;
 		justify-content: end;
+	}
+
+	.status {
+		font-size: 16px;
 	}
 
 	/* 	0. PENDENTE */
@@ -104,15 +187,18 @@
 		border-radius: 10px;
 	}
 
-	.status-text-pendente,
-	.status-text-lancado,
 	.status-text-agendado {
 		color: var(--cor-secundaria);
 	}
 
+	.status-text-pendente,
+	.status-text-lancado {
+		color: var(--cor-primaria);
+	}
+
 	/* 3. AGUARDANDO_CORRECAO */
 	.status-text-aguardando_correcao {
-		color: red;
+		color: var(--cor-secundaria-2);
 	}
 
 	.status-grade-aguardando_correcao {
@@ -134,5 +220,11 @@
 		padding-right: 4px;
 		background-color: var(--cor-secundaria);
 		border-radius: 10px;
+	}
+
+	.botoes {
+		display: flex;
+		flex-direction: row;
+		gap: 4px;
 	}
 </style>

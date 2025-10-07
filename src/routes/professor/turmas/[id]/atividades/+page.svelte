@@ -7,14 +7,13 @@
 	import ButtonRedirect from '$lib/components/ButtonRedirect.svelte';
 	import selectedTurmaTabBar from '$src/stores/selectedTurmaTabBar.js';
 
-	export let data;
-	let atividades;
-	let id;
-	let url;
+	let { data } = $props();
 
-	$: atividades = data.atividades;
-	$: id = $page.params.id;
-	$: url = `/${data.perfil}/turmas/${id}/atividades/create`;
+	let atividades = $derived(data.atividades);
+	let id = $derived($page.params.id);
+	let url = $derived(`/${data.perfil}/turmas/${id}/atividades/create`);
+
+	const maxEtapas = parseInt(data.config?.max_etapas);
 
 	$selectedTurmaTabBar = 1;
 
@@ -26,8 +25,13 @@
 		if (data.toast === 'etapas_criadas') {
 			toast.success('Etapa(s) definida(s) com sucesso.');
 		}
+		sessionStorage.removeItem('etapas');
 		sessionStorage.removeItem('grupos');
 	});
+
+	function comparaAtividade(a, b) {
+		return a.id - b.id;
+	}
 </script>
 
 <Toaster richColors position="top-center" closeButton />
@@ -37,8 +41,8 @@
 	{#if atividades.length == 0}
 		<p>(Não há atividades nessa turma)</p>
 	{:else}
-		{#each atividades as atividade}
-			<AtividadeTurma {atividade} idTurma={id} />
+		{#each atividades.sort(comparaAtividade) as atividade (atividade.id)}
+			<AtividadeTurma {atividade} idTurma={id} {maxEtapas} />
 		{/each}
 	{/if}
 	<ButtonRedirect href={url}>Criar nova atividade</ButtonRedirect>

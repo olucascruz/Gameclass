@@ -3,7 +3,9 @@ import {
 	buscaPorIdBD,
 	listaPorIdTurmaBD,
 	buscaPorTituloBD,
-	removeAtividadeBD
+	removeAtividadeBD,
+	atualizaAtividadeBD,
+	arquivarAtividadeBD
 } from "../repositories/atividade.js";
 
 import ItemAtividadeController from "./itemAtividade.js";
@@ -24,6 +26,23 @@ export default class AtividadeController {
 			atividade.descricao,
 			atividade.prazo,
 			atividade.id_turma
+		);
+
+		return res.rows[0]; // retorna o ID
+	}
+
+	async atualiza(atividade) {
+
+		const existente = await this.buscaPorId(atividade.id);
+		if (!existente) {
+			throw new Error("Atividade não encontrada");
+		}
+
+		const res = await atualizaAtividadeBD(
+			atividade.id,
+			atividade.titulo,
+			atividade.descricao,
+			atividade.prazo
 		);
 
 		return res.rows[0]; // retorna o ID
@@ -60,5 +79,9 @@ export default class AtividadeController {
 	async listaPorIdTurma(id_turma) {
 		const res = await listaPorIdTurmaBD(id_turma);
 		return res.rows.map((row) => new Atividade(row));
+	}
+
+	async arquivar(idAtividade) {
+		return await arquivarAtividadeBD(idAtividade);
 	}
 }

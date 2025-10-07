@@ -1,10 +1,16 @@
 <script>
 	import { goto } from '$app/navigation';
 
-	export let nome = '',
-		ano = 0,
-		disciplina = '',
-		idTurma = 0;
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [nome]
+	 * @property {number} [ano]
+	 * @property {string} [disciplina]
+	 * @property {number} [idTurma]
+	 */
+
+	/** @type {Props} */
+	let { nome = '', ano = 0, disciplina = '', idTurma = 0 } = $props();
 
 	function onClick() {
 		const url = `/professor/turmas/${idTurma}`;
@@ -12,10 +18,10 @@
 	}
 </script>
 
-<button class="container" on:click={onClick}>
+<button class="container" onclick={onClick}>
 	<div class="info-container">
 		<p style="font-size: 20px;"><b>{nome}</b></p>
-		<hr style="border-color: var(--cor-secundaria)">
+		<hr style="border-color: var(--cor-secundaria)" />
 		<p style="font-size: 20px; margin-top: 4px">{disciplina} - {ano}</p>
 	</div>
 </button>
@@ -30,11 +36,11 @@
 		background-color: white;
 		margin: 8px;
 		padding: 8px 8px 8px 8px;
-		border-radius: 50px;
+		border-radius: 12px;
 		gap: 12px;
 		cursor: pointer;
 		color: var(--text-1);
-		background-color: var(--cor-primaria)
+		background-color: var(--cor-primaria);
 	}
 
 	.info-container {

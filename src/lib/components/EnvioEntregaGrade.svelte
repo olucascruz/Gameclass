@@ -2,14 +2,12 @@
 	import { onMount } from 'svelte';
 	import Entrega from '$lib/models/Entrega.js';
 
-	export let dados;
-	export let receberAposPrazo;
-	export let onClick;
+	let { dados, receberAposPrazo, onClick } = $props();
 
-	let corCard;
+	let corCard = $state();
 
 	onMount(() => {
-		if (dados && dados.entrega && dados.entrega.avaliacao) {
+		if (dados && dados.entrega && dados.entrega.avaliada) {
 			corCard = 'green';
 		} else if (dados && !dados.entrega && dados.prazo < new Date()) {
 			corCard = 'var(--cor-secundaria-2)';
@@ -28,14 +26,14 @@
 				<p class="nome">{dados.estudante.nome}</p>
 			{/if}
 
-			{#if dados.entrega.avaliacao}
-				<p>Avaliado</p>
+			{#if dados.entrega.avaliada}
+				<p>Avaliada (<b>{dados.entrega.avaliacao.media}</b>)</p>
 			{:else}
 				<p class="avaliacao-pendente">Avaliação Pendente</p>
 			{/if}
 
 			<p class="data">{new Entrega(dados.entrega).formataDataEntrega()}</p>
-			<button on:click={onClick} class="botao">Visualizar</button>
+			<button onclick={onClick} class="botao">Visualizar</button>
 		</div>
 	{:else if dados.estudante || dados.grupo}
 		<div class="card off">
@@ -53,7 +51,11 @@
 				{/if}
 			{/if}
 
-			<p class="sem-resposta">Aguardando Resposta</p>
+			{#if dados.em_grupos && dados.inicio > new Date()}
+				<p class="data">Grupo Formado</p>
+			{:else}
+				<p class="sem-resposta">Aguardando Resposta</p>
+			{/if}
 		</div>
 	{:else}
 		<div class="card off">

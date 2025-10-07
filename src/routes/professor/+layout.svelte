@@ -2,27 +2,35 @@
 	import '../../static/app.css';
 	import Header from '$lib/components/Header.svelte';
 	import SideBar from '$lib/components/SideBar.svelte';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/stores';
-	import Button from '$lib/components/Button.svelte';
-	import { onMount } from 'svelte';
+	import { historyStack } from '$src/stores/history.js';
+	import BackButton from '../../lib/components/BackButton.svelte';
+	import selectedTurma from '$src/stores/selectedTurma.js';
 
-	export let data;
-	let previousPage;
-	let voltarPara;
+	let { data, children } = $props();
 	const BACK_SKIP = [`/${data.perfil}/turmas`];
 
-	$: voltarPara = $page.data.voltarPara;
+	$effect(() => {
+		const turmaIdFromUrl = $page.params.id;
 
-	function onBack() {
-		if (voltarPara) {
-			goto(voltarPara);
-		} else {
-			const partes = $page.url.pathname.split('/');
-			partes.pop();
-			goto(partes.join('/'));
+		if (turmaIdFromUrl) {
+			$selectedTurma = turmaIdFromUrl;
 		}
-	}
+	});
+
+	afterNavigate(() => {
+		const currentStack = $historyStack;
+		const lastPage = currentStack[currentStack.length - 1];
+		const currentPage = $page.url.pathname;
+
+		if (currentStack.length > 0 && lastPage.includes(currentPage)) {
+			historyStack.update((stack) => [...stack.slice(0, -1)]);
+		} else {
+			console.debug('5');
+			historyStack.update((stack) => [...stack, currentPage]);
+		}
+	});
 </script>
 
 <div class="turmas-container">
@@ -32,23 +40,14 @@
 		<div class="content-page">
 			<!-- TODO: melhorar design do botão -->
 			{#if !BACK_SKIP.includes($page.url.pathname)}
-				<div class="button-container">
-					<Button backgroundColor="var(--cor-primaria)" color="white" on:click={onBack}
-						>{'<-'}</Button
-					>
-				</div>
+				<BackButton />
 			{/if}
-			<slot></slot>
+			{@render children?.()}
 		</div>
 	</div>
 </div>
 
 <style>
-	.button-container {
-		position: absolute;
-		margin: 20px;
-	}
-
 	.turmas-container {
 		display: flex;
 		flex-direction: column;

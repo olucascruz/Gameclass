@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import CircularIcon from '$lib/components/CircularIcon.svelte';
+	import CircularTextIcon from '$lib/components/CircularTextIcon.svelte';
 	import Comentario from '$lib/components/Comentario.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Anexo from '$lib/components/Anexo.svelte';
@@ -11,23 +12,18 @@
 	import { TIPO_ARQUIVO, TIPO_COMENTARIO, AVALIACAO } from '$lib/constants.js';
 	import { Toaster, toast } from 'svelte-sonner';
 
-	export let data;
+	let { data = $bindable() } = $props();
 
 	const descricaoEtapa =
 		'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus sit amet lacinia felis. Quisque maximus sit amet magna quis dapibus. Quisque mollis dui vel nisi commodo, nec aliquet ante tempor. Suspendisse at eros tristique, volutpat mi faucibus, viverra nibh. Nullam sagittis, sem in viverra blandit, nulla felis sollicitudin arcu, eu maximus ligula justo non tortor. Mauris sollicitudin scelerisque sapien tempor maximus. Sed in cursus magna. Suspendisse potenti. Nulla dolor nisl, tristique sit amet bibendum nec, auctor nec risus. Aenean tincidunt mi purus, at mollis quam faucibus in. Sed dictum erat arcu, vitae feugiat justo gravida ut.';
 
-	let id;
-	let idAtividade;
-	let idEtapa;
+	let id = $derived($page.params.id);
+	let idAtividade = $derived($page.params.idAtividade);
+	let idEtapa = $derived($page.params.idEtapa);
 	let status, corStatus;
-	let textoComentario;
-	let arquivo;
-	let listaComentarios;
-
-	$: id = $page.params.id;
-	$: idAtividade = $page.params.idAtividade;
-	$: idEtapa = $page.params.idEtapa;
-	$: listaComentarios = comentarios;
+	let textoComentario = $state();
+	let arquivo = $state();
+	let listaComentarios = $derived(comentarios);
 
 	const dateOptions = {
 		day: '2-digit',
@@ -62,7 +58,14 @@
 		if (response.ok) {
 			fetchComentarios(idEntrega);
 			textoComentario = '';
+			toast.success('Comentário criado');
 		}
+	}
+
+	function abrePerfilDoUsuario(estudante) {
+		console.debug('estudante => ', estudante);
+		const url = `/professor/turmas/${data.idTurma}/membros/${estudante.id}`;
+		goto(url);
 	}
 
 	onMount(async () => {
@@ -91,6 +94,13 @@
 		<hr />
 		<div class="descricao-etapa">{descricaoEtapa}</div>
 		<hr />
+		<div class="comentario-input">
+			<CircularIcon backgroundColor={'#' + data.cor} text="V" type="text" />
+			<InputText bind:value={textoComentario} borded placeholder="Deixe um comentário" />
+			<Button type="text" backgroundColor="var(--cor-secundaria)" on:click={adicionarComentario}
+				>Enviar</Button
+			>
+		</div>
 		<div class="comentarios-etapa">
 			<p style="font-size:22px">{$listaComentarios.length} Comentários</p>
 			{#each $listaComentarios as comentario}
@@ -102,19 +112,26 @@
 				/>
 			{/each}
 		</div>
-		<div class="comentario-input">
-			<CircularIcon backgroundColor={'#' + data.cor} text="V" type="text" />
-			<InputText bind:value={textoComentario} borded placeholder="Deixe um comentário" />
-			<Button type="text" backgroundColor="var(--cor-secundaria)" on:click={adicionarComentario}
-				>Enviar</Button
-			>
-		</div>
 	</div>
 	<div class="right-column">
 		{#if data.etapa.em_grupos}
 			<h2>Grupo: {data.nome}</h2>
 		{:else}
-			<h2>Estudante: {data.nome}</h2>
+			<h2>Estudante:</h2>
+			<button
+				class="membro-container"
+				onclick={() => {
+					abrePerfilDoUsuario(data.estudante);
+				}}
+			>
+				<div class="membro-icon">
+					<CircularTextIcon backgroundColor="#{data.estudante.cor}"
+						>{data.estudante.nome[0]}</CircularTextIcon
+					>
+				</div>
+				<p class="membro-nome">{data.estudante.nome}</p>
+			</button>
+			<!-- <h2>Estudante: {data.nome}</h2> -->
 		{/if}
 		<div class="resposta-container">
 			<div class="top-content">
@@ -186,6 +203,7 @@
 		flex-direction: column;
 		padding-left: 48px;
 		padding-right: 12px;
+		align-items: center;
 	}
 
 	.left-column {
@@ -221,6 +239,8 @@
 		display: flex;
 		flex-direction: column;
 		gap: 32px;
+		margin-top: 24px;
+		width: 90%;
 	}
 
 	.comentario-input {
@@ -289,5 +309,41 @@
 		background-color: #a1a1a1;
 		transition: 0.3s;
 		cursor: pointer;
+	}
+
+	.membro-container {
+		margin-bottom: 12px;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		width: fit-content;
+		max-width: 400px;
+		border-radius: 48px;
+		background-color: var(--cor-primaria);
+		padding: 12px 12px 12px 0px;
+		border: none;
+		cursor: pointer;
+	}
+
+	.membro-icon {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: start;
+		text-align: center;
+		padding: 0px 12px;
+	}
+
+	.membro-nome {
+		text-align: start;
+		font-family: var(--font);
+		color: white;
+		font-size: 24px;
+		font-weight: 600;
+		margin: 0;
+		width: 100%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 </style>

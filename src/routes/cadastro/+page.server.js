@@ -1,15 +1,24 @@
 
 import { fail, redirect, error } from "@sveltejs/kit";
-import  UsuarioController  from "$controllers/usuario";
+// import { registerNewUser } from "$controllers/auth";
 import { getRandomInt } from "$lib/utils/util";
 import { CORES_PERFIL } from "$lib/constants";
+import UsuarioController from "$lib/server/controllers/usuario";
+
+const usuarioController = new UsuarioController()
 
 export const actions = {
 	default: async ({ request, cookies }) => {
 		const data = await request.formData();
 		let res;
-		console.log(data)
-		if (!data.get("login") || !data.get("password") || !data.get("nome") || !data.get("instituicao") || !data.get("dtNasc") || !data.get("email") || !data.get("matriculaAluno")) {
+		console.debug("data => ", data)
+
+		if (!data.get("login")
+			|| !data.get("password")
+			|| !data.get("nome")
+			|| !data.get("dtEntregaMin")
+			|| !data.get("email")
+		) {
 			error(400, "Missing Data")
 		}
 
@@ -18,11 +27,21 @@ export const actions = {
 		try {
 
 			const cor = CORES_PERFIL[getRandomInt(CORES_PERFIL.length)].slice(1)
-			const usuarioController = new UsuarioController();
-			res = await usuarioController.registra(data.get("nome"), data.get("login"), data.get("password"), data.get("instituicao"), data.get("dtNasc"), bio, data.get("email"), data.get("matriculaAluno"), cor)
+			res = await usuarioController.registra(
+				data.get("nome"),
+				data.get("login"),
+				data.get("password"),
+				// data.get("instituicao"),
+				data.get("dtEntregaMin"),
+				bio,
+				data.get("email"),
+				// data.get("matriculaAluno"),
+				cor
+			)
 		} catch (e) {
 			 console.error(e)
 			// TODO: Verificar se é mesmo esse erro
+			console.debug("erro => ", e)
 			return fail(400, { already_registered: true })
 		}
 

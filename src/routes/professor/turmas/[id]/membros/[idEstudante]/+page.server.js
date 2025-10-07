@@ -16,6 +16,8 @@ export async function load({ params, cookies }) {
 
 	data.turma = await turmaController.buscaPorCodigo(idTurma)
 	data.estudante = await estudanteController.buscaPorId(idEstudante)
+	// data.estudante.conquistas = await estudanteController.listaConquistasPorId(idEstudante)
+	data.estudante.conquistas = await estudanteController.listaConquistasPorIdTurma(idEstudante, idTurma)
 	let ranking = await rankingController.listaRankingPorIdTurma(idTurma)
 	ranking = ranking.sort((a, b) => a.pontos > b.pontos).map((e, i) => {
 		e.index = i + 1
@@ -23,7 +25,7 @@ export async function load({ params, cookies }) {
 	})
 
 	const estudante = ranking.filter((e) => e.id == idEstudante)
-	data.estudante.posicao_ranking = estudante[0].index
+	data.estudante.posicao_ranking = estudante[0]?.index
 
 	data.outras_turmas = await turmaController.listaPorEstudanteProfessor(idEstudante, idProfessor)
 	data.outras_turmas = data.outras_turmas.filter((t) => t.id != idTurma)

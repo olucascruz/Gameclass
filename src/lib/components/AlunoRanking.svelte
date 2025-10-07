@@ -1,21 +1,41 @@
 <script>
 	import CircularTextIcon from './CircularTextIcon.svelte';
-	import { goto } from '$app/navigation';
+	import PopupAluno from './PopupAluno.svelte'; // Importe o novo componente
 
-	export let nome = '',
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [nome] - Apelido do aluno
+	 * @property {string} [nomeReal] - Nome real do aluno
+	 * @property {string} [email] - Email do aluno
+	 * @property {number} [pontos]
+	 * @property {number} [posicao]
+	 * @property {string} [cor]
+	 * @property {number} [idEstudante]
+	 * @property {number} [idTurma]
+	 */
+
+	/** @type {Props} */
+	let {
+		login = '',
+		nome = 'Nome não informado', // Adicione os novos props
+		email = 'email@naoinformado.com', // Adicione os novos props
 		pontos = 0,
 		posicao = 0,
 		cor = 'var(--cor-primaria)',
 		idEstudante = 0,
-		idTurma = 0;
+		idTurma = 0
+	} = $props();
+
+	let showPopup = $state(false);
 
 	function onClick() {
-		const url = `/professor/turmas/${idTurma}/membros/${idEstudante}`;
-		goto(url);
+		// Em vez de navegar, agora mostramos o popup
+		console.debug('onclick');
+		showPopup = true;
 	}
 </script>
 
-<button class="container" on:click={onClick}>
+<button class="container" onclick={onClick}>
 	<CircularTextIcon backgroundColor={cor}>{posicao}°</CircularTextIcon>
 	<div class="info-container">
 		<p style="font-size: 20px;"><b>{nome}</b></p>
@@ -23,10 +43,23 @@
 	</div>
 </button>
 
+{#if showPopup}
+	<PopupAluno
+		{login}
+		{nome}
+		{email}
+		{pontos}
+		{idEstudante}
+		{idTurma}
+		on:close={() => (showPopup = false)}
+	/>
+{/if}
+
 <style>
 	.container {
+		box-sizing: border-box;
 		border: none;
-		width: 301px;
+		width: 100%;
 		display: flex;
 		flex-direction: row;
 		align-items: center;

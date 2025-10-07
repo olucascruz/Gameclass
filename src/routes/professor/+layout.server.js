@@ -39,8 +39,8 @@ export async function load({ url, cookies, params }) {
 	console.log("PARTES URL",parts)
 
 	// Turma
-	if (parts.length == 2 && parts[2] && !isNaN(parts[2])) {
-		data.turma = await turmaController.buscaPorId(params["id"])
+	if (parts.length > 2 && parts[2] && parts[2].trim() != "create") {
+		data.turma = await turmaController.buscaPorId(parts[2])
 	}
 
 	if (parts[3] && parts[4] && parts[3] == 'membros') {
@@ -57,26 +57,31 @@ export async function load({ url, cookies, params }) {
 
 		}
 
-		// Etapa
-		if (parts.length > 5) {
-			const etapa = await etapaController.buscaPorId(parts[5])
-			data.etapa = etapa.toObject()
-		}
-
-		// Estudante/Grupo
-		if (parts.length > 6) {
-			const entrega = await entregaController.buscaPorId(parts[6])
-
-			if (data.etapa.em_grupos) {
-				data.grupo = await grupoController.buscaPorId(entrega.id_grupo_de_alunos)
-			} else {
-				data.estudante = await estudanteController.buscaPorId(entrega.id_estudante)
+		if (parts[5] != "edit") {
+			// Etapa
+			if (parts.length > 5) {
+				const etapa = await etapaController.buscaPorId(parts[5])
+				data.etapa = etapa.toObject()
 			}
-		}
 
-		// Integrante
-		if (parts.length > 7 && Number.isInteger(parts[7])) {
-			data.integrante = await estudanteController.buscaPorId(parts[7])
+			// Estudante/Grupo
+			if (parts[6] != "edit") {
+				if (parts.length > 6) {
+					const entrega = await entregaController.buscaPorId(parts[6])
+
+					if (data.etapa.em_grupos) {
+						data.grupo = await grupoController.buscaPorId(entrega.id_grupo_de_alunos)
+					} else {
+						data.estudante = await estudanteController.buscaPorId(entrega.id_estudante)
+					}
+				}
+				// Integrante
+				if (parts.length > 7 && Number.isInteger(parts[7])) {
+					data.integrante = await estudanteController.buscaPorId(parts[7])
+				}
+			}
+
+
 		}
 
 

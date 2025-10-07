@@ -1,39 +1,68 @@
 <script>
-	export let type = '';
-	export let width = '';
-	export let height = '';
-	export let color = '';
-	export let backgroundColor = '';
-	export let marginTop = '';
-	export let fontSize = '24px';
-	export let disabled = false;
-	export let fontWeight = 'bold';
+	import { createBubbler } from 'svelte/legacy';
+
+	const bubble = createBubbler();
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [type]
+	 * @property {string} [width]
+	 * @property {string} [height]
+	 * @property {string} [color]
+	 * @property {string} [backgroundColor]
+	 * @property {string} [marginTop]
+	 * @property {string} [fontSize]
+	 * @property {boolean} [disabled]
+	 * @property {string} [fontWeight]
+	 * @property {import('svelte').Snippet} [children]
+	 */
+
+	/** @type {Props & { [key: string]: any }} */
+	let {
+		type = '',
+		width = '',
+		height = '',
+		color = '',
+		backgroundColor = '',
+		marginTop = '',
+		fontSize = '24px',
+		disabled = false,
+		fontWeight = 'bold',
+		children,
+		...rest
+	} = $props();
 </script>
 
 <button
 	{type}
 	class="button"
 	{disabled}
-	style="background-color: {backgroundColor}; color: {color}; margin-top: {marginTop}; font-size: {fontSize}; width: {width}; height: {height}; font-weight:{fontWeight}"
-	on:click
-	{...$$restProps}
+	title={disabled ? 'Número máximo de etapas atingido.' : 'Criar nova etapa'}
+	style:background-color={disabled ? 'lightgray' : backgroundColor}
+	style:color={disabled ? 'darkgray' : color}
+	style:margin-top={marginTop}
+	style:font-size={fontSize}
+	style:width
+	style:height
+	style:font-weight={fontWeight}
+	onclick={bubble('click')}
+	{...rest}
 >
-	<slot></slot>
+	{@render children?.()}
 </button>
 
 <style>
 	.button {
 		border: none;
-		min-height: 48px;
 		font-family: var(--font);
 		color: var(--cor-primaria);
 		border-radius: 15px;
 		padding: 10px 15px;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
 	}
 
 	.button:disabled {
-		color: darkgray;
-		background-color: lightgray;
 		cursor: default;
 	}
 

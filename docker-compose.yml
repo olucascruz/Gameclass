@@ -7,12 +7,13 @@ services:
       - ./sql/01-cria-tabelas.sql:/docker-entrypoint-initdb.d/01-cria-tabelas.sql
       - ./sql/02-insert-statements.sql:/docker-entrypoint-initdb.d/02-insert-statements.sql
       - ./sql/03-insert-debug-data.sql:/docker-entrypoint-initdb.d/03-insert-debug-data.sql
+      - ./sql/04-insert-test-data.sql:/docker-entrypoint-initdb.d/04-insert-test-data.sql
       - ./init-scripts:/docker-entrypoint-initdb.d
     environment:
-      POSTGRES_PASSWORD: $VITE_DATABASE_PASSWORD
-      PGUSER: $VITE_DATABASE_USER
-      POSTGRES_USER: $VITE_DATABASE_USER
-      POSTGRES_DB: $VITE_DATABASE_NAME
+      POSTGRES_PASSWORD: $DATABASE_PASSWORD
+      PGUSER: $DATABASE_USER
+      POSTGRES_USER: $DATABASE_USER
+      POSTGRES_DB: $DATABASE_NAME
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       # Números mágicos, podem não funcionar se o processo demorar mais
@@ -20,7 +21,7 @@ services:
       timeout: 20s
       retries: 10
     ports:
-      - "$VITE_DATABASE_PORT"
+      - "$DATABASE_PORT"
       - 54320:5432
 
 

@@ -2,11 +2,85 @@
 	import Button from '$lib/components/Button.svelte';
 	import InputText from '$lib/components/InputText.svelte';
 	import IconeInformacao from '$lib/components/IconeInformacao.svelte';
+	import InputNumber from '$lib/components/InputNumber.svelte';
 	import { toast, Toaster } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
 	import { ATRIBUICAO } from '$lib/constants.js';
+	import Modal from '$lib/components/Modal.svelte';
+	import { navigationGuard } from '$src/stores/navigationGuard.js';
+	import { onDestroy, onMount } from 'svelte';
 
-	const { data } = $props();
+	let { data } = $props();
+
+	let showModalCancelarAvaliacao = $state(false);
+	let novoCriterioNota = $state('');
+	let oldCriterioNota = $state('');
+	let resolvePromise;
+
+	function requestConfirmation() {
+		showModalCancelarAvaliacao = true;
+		return new Promise((resolve) => {
+			resolvePromise = resolve;
+		});
+	}
+
+	function formatarNota(valor) {
+		let digitsOnly = String(valor).replace(/\D/g, '');
+
+		if (!digitsOnly) {
+			return '';
+		}
+
+		let formattedValue;
+
+		if (digitsOnly.length >= 3 && digitsOnly.startsWith('100')) {
+			formattedValue = '10.0';
+		}
+		else if (digitsOnly.length >= 2 && digitsOnly.startsWith('10')) {
+			 formattedValue = '10';
+		}
+		else if (digitsOnly.length >= 2) {
+			formattedValue = digitsOnly.charAt(0) + '.' + digitsOnly.substring(1, 2);
+		}
+		else {
+			formattedValue = digitsOnly;
+		}
+		
+		return formattedValue;
+	}
+
+	function onChangeCriterioNota() {
+		novoCriterioNota = formatarNota(novoCriterioNota);
+
+		if (parseFloat(novoCriterioNota) > 10.0 || novoCriterioNota === '0.0') {
+			novoCriterioNota = oldCriterioNota;
+		} else {
+			oldCriterioNota = novoCriterioNota;
+		}
+	}
+
+	onMount(() => {
+		navigationGuard.set(requestConfirmation);
+	});
+
+	onDestroy(() => {
+		navigationGuard.set(null);
+	});
+
+	// Funções chamadas pelos botões do modal
+	function handleConfirm() {
+		showModalCancelarAvaliacao = false;
+		if (resolvePromise) {
+			resolvePromise(true); // Confirma a navegação
+		}
+	}
+
+	function handleCancel() {
+		showModalCancelarAvaliacao = false;
+		if (resolvePromise) {
+			resolvePromise(false); // Cancela a navegação
+		}
+	}
 
 	const notas = $state(
 		data.entrega.notas.length != 0
@@ -16,6 +90,7 @@
 				}))
 			: data.etapa.criterios.map((c) => ({ id_criterio: c.id, nota: null }))
 	);
+	console.debug('notas => ', notas);
 
 	function validarNotas() {
 		const inputs = document.querySelectorAll('.input-container input');
@@ -95,6 +170,23 @@
 			: 'grid-template-columns: 1fr auto auto';
 </script>
 
+<Modal
+	visible={showModalCancelarAvaliacao}
+	title="Atenção"
+	message="Deseja realmente cancelar a avaliação da etapa? Todos os dados preenchidos serão perdidos."
+	buttons={[
+		{
+			label: 'Sim, Cancelar',
+			onClick: handleConfirm, // Chama a função que resolve a Promise com 'true'
+			color: 'green'
+		},
+		{
+			label: 'Não, Continuar',
+			onClick: handleCancel, // Chama a função que resolve a Promise com 'false'
+			color: 'red'
+		}
+	]}
+/>
 <Toaster richColors expand position="top-center" closeButton />
 <div class="container">
 	<p class="titulo-atividade">{data.atividade.titulo}</p>
@@ -137,17 +229,14 @@
 					<IconeInformacao text={criterio.descricao} />
 				</div>
 				<div class="input-container">
-					<InputText
+					<InputNumber
+						id="inputNotaMaxCriterio"
 						borded
 						name={criterio.titulo}
-						placeholder="Nota"
 						width="80px"
+						placeholder="Nota"
+						oninput={() => onChangeCriterioNota(notas[index].nota, index)}
 						bind:value={notas[index].nota}
-						inputHandler={(e) => formatarNota(notas[index].nota, index, e)}
-						on:blur={() => formatarNotaFinal(index, criterio)}
-						step="0.1"
-						min="0"
-						max="10"
 					/>
 				</div>
 				<div class="nota-max">

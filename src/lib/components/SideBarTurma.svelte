@@ -1,16 +1,19 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import CircularIcon from './CircularIcon.svelte';
 	import selectedTurma from '$src/stores/selectedTurma.js';
 	import { goto } from '$app/navigation';
+	import { Tooltip } from '@svelte-plugins/tooltips';
 
-	export let turma;
-	export let perfil;
+	let { turma, perfil } = $props();
 
-	const acronym = turma.nome[0];
-	const color = turma.cor;
+	const acronym = $derived(turma.nome[0]);
+	const color = $derived(turma.cor);
 
-	let backgroundColor, disciplinaCor;
-	$: {
+	let backgroundColor = $state(),
+		disciplinaCor = $state();
+	$effect(() => {
 		if ($selectedTurma === turma.id) {
 			backgroundColor = 'var(--cor-secundaria)';
 			disciplinaCor = 'var(--cor-primaria)';
@@ -18,29 +21,28 @@
 			backgroundColor = '';
 			disciplinaCor = 'var(--cor-secundaria)';
 		}
-	}
+	});
+
+	const tooltipMsg = `<b>Nome da turma:</b> ${turma.nome}<br><b>Disciplina:</b> ${turma.disciplina}<br><b>Ano</b>: ${turma.ano}<br><b>Periodo:</b> ${turma.periodo}`;
 </script>
 
-<div
-	class="turma"
-	aria-hidden="true"
-	style="background-color: {backgroundColor};"
-	on:click={() => {
-		$selectedTurma = turma.id;
-		try {
-			let url = `/${perfil}/turmas/` + turma.id + '/atividades';
+<Tooltip content={tooltipMsg} delay="2000">
+	<div
+		class="turma"
+		aria-hidden="true"
+		style="background-color: {backgroundColor};"
+		onclick={() => {
+			const url = `/${perfil}/turmas/${turma.id}/atividades`;
 			goto(url);
-		} catch (e) {
-			console.error('Erro:', e);
-		}
-	}}
->
-	<CircularIcon backgroundColor="#{color}" text={acronym} type="text" />
-	<div class="info">
-		<h1>{turma.nome}</h1>
-		<p style="color:{disciplinaCor}">{turma.disciplina}</p>
+		}}
+	>
+		<CircularIcon backgroundColor="#{color}" text={acronym} type="text" />
+		<div class="info">
+			<h1>{turma.nome}</h1>
+			<p style="color:{disciplinaCor}">{turma.disciplina}</p>
+		</div>
 	</div>
-</div>
+</Tooltip>
 
 <style>
 	.turma {
@@ -64,17 +66,15 @@
 	}
 
 	.info {
-		max-width: 90%;
+		min-width: 0;
 		display: flex;
 		flex-direction: column;
 	}
 
 	.info > h1 {
 		font-size: 20px;
-
 		overflow: hidden;
 		white-space: nowrap;
-		text-wrap: nowrap;
 		text-overflow: ellipsis;
 	}
 

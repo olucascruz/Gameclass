@@ -1,21 +1,23 @@
 import bcrypt from "bcryptjs"
-import { buscaPorLoginBD, removePorLoginBD, registraUsuarioBD, loginBD } from "../repositories/usuario";
+import { buscaPorLoginBD, buscaPorEmailBD, removePorLoginBD, registraUsuarioBD, loginBD } from "../repositories/usuario";
 import InstituicaoController from "./instituicao";
 import { Usuario } from "../../models/Usuario";
 
 const instituicaoController = new InstituicaoController()
 
 export default class UsuarioController {
-	async registra(nome, login, password, instituicao, dtNasc, bio, email, matricula_aluno, cor) {
-		if (!nome || !login || !password || !instituicao || !dtNasc || !email) {
+	async registra(nome, login, password, dtNasc, bio, email, cor) {
+		console.debug(nome, login, password, dtNasc, bio, email, cor)
+		if (!nome || !login || !password || !dtNasc || !email) {
 			throw ("Dados obrigatórios não foram preenchidos.")
 		}
-		
-		const hasUser = await this.buscaPorLogin(login) 
-		if (hasUser.id) {
-			console.log("Tem usuário", hasUser.id)
+
+		let existeLogin = await this.buscaPorLogin(login)
+		console.debug("existeLogin => ", existeLogin)
+		if (existeLogin) {
 			throw ("Já existe usuário com o mesmo login cadastrado.")
 		}
+
 		
 		const instituicaoRes = await instituicaoController.buscaPorNome(instituicao);
 		const idInstituicao = instituicaoRes.id
@@ -32,7 +34,7 @@ export default class UsuarioController {
 		email = email.trim()
 		matricula_aluno = matricula_aluno.trim()
 		try {
-			let res = await registraUsuarioBD(nome, login, hash, salt, idInstituicao, dtNasc, bio, email, matricula_aluno, nivelInicial, acumuloXpInicial, dataCriacao, ultimoAcesso, cor)
+			let res = await registraUsuarioBD(nome, login, hash, salt, dtNasc, bio, email, nivelInicial, acumuloXpInicial, dataCriacao, ultimoAcesso, cor)
 
 			if (res.rowCount > 0) {
 				return res.rows
@@ -47,7 +49,7 @@ export default class UsuarioController {
 			throw ("Preencha o login e a senha")
 		}
 
-		if (!await this.buscaPorLogin(login)) {
+		if (!await this.buscaPorLogin(login) && !await this.buscaPorEmail(login)) {
 			throw ("Usuário não cadastrado")
 		}
 
@@ -66,8 +68,14 @@ export default class UsuarioController {
 
 	async buscaPorLogin(login) {
 		const res = await buscaPorLoginBD(login);
-		console.log(res)
-		return new Usuario({ ...res });
+
+		return res ? new Usuario({ ...res }) : res
+	}
+
+	async buscaPorEmail(email) {
+		const res = await buscaPorEmailBD(email);
+
+		return res ? new Usuario({ ...res }) : res
 	}
 
 }

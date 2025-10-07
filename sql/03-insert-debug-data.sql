@@ -7,12 +7,11 @@ INSERT INTO usuario("id",
 	"email",
 	"acumulo_xp",
 	"nivel",
-	"matricula_aluno",
 	"dt_nasc",
 	"data_criacao",
 	"ultimo_acesso",
-	"cor",
-	"id_instituicao") 
+	"cor"
+	) 
 VALUES
 	(1,
 	'Vinícius Pessoa',
@@ -21,11 +20,11 @@ VALUES
 	'$2a$10$8K.0ETBQRhu41sbIssQFsO',
 	'Sou estudante de SI :)',
 	'vcbp.snf18@uea.edu.br', 0, 0,
-	'1811440260',
 	'1999-12-06',
 	'2024-09-10',
 	'2024-09-10T23:51:53.764Z',
-	'D7854F', 1),
+	'D7854F'
+	),
 	(2,
 	'Ana Souza',
 	'AnaS10',
@@ -33,11 +32,11 @@ VALUES
 	'$2a$10$XyZABCD12345KJHsdUqPO',
 	'Apaixonada por tecnologia e educação.',
 	'ana.souza@email.com', 150, 2,
-	'1811440261',
 	'2001-05-15',
 	'2024-09-11',
 	'2024-09-11T10:25:30.123Z',
-	'6c943d', 1),
+	'6c943d'
+	),
 	(3,
 	'Carlos Oliveira',
 	'Carlos_Oliveira',
@@ -45,11 +44,11 @@ VALUES
 	'$2a$10$MNOPQRST9876543JHKLZX',
 	'Entusiasta de IA e jogos.',
 	'carlos.oliveira@email.com', 320, 3,
-	'1811440262',
 	'1998-07-22',
 	'2024-09-12',
 	'2024-09-12T14:12:45.567Z',
-	'C75B5B', 1),
+	'C75B5B'
+	),
 	(4,
 	'Mariana Lima',
 	'MariLima99',
@@ -57,12 +56,11 @@ VALUES
 	'$2a$10$UVWXYZ87654321LMNO',
 	'Amante de dados e estatística.',
 	'mariana.lima@email.com', 200, 2,
-	'1811440263',
 	'2000-02-08',
-
 	'2024-09-13',
 	'2024-09-13T08:45:20.789Z',
-	'6A4CA3', 1),
+	'6A4CA3'
+	),
 	(5,
 	'Felipe Martins',
 	'FelipeM',
@@ -70,12 +68,11 @@ VALUES
 	'$2a$10$ASDFGHJKLQWERTYUIO',
 	'Desenvolvedor full-stack.',
 	'felipe.martins@email.com', 500, 4,
-
-	'1811440264',
 	'1997-10-30',
 	'2024-09-14',
 	'2024-09-14T19:05:10.234Z',
-	'D7854F', 1),
+	'D7854F'
+	),
 	(6,
 	'Julia Ribeiro',
 	'Julia_R',
@@ -83,11 +80,11 @@ VALUES
 	'$2a$10$QAZWSXEDCRFV12345',
 	'Curiosa sobre ciência de dados.',
 	'julia.ribeiro@email.com', 100, 1,
-	'1811440265',
 	'2002-11-18',
 	'2024-09-15',
 	'2024-09-15T16:33:25.432Z',
-	'2E5D89', 1),
+	'2E5D89'
+	),
 	(7,
 	'Ana Clara Souza',
 	'AnaSouza12',
@@ -95,11 +92,11 @@ VALUES
 	'$2a$10$8K.0ETBQRhu41sbIssQFsO',
 	'Estudante de Direito apaixonada por filosofia!',
 	'ana.souza@uea.edu.br', 50, 1,
-	'1811440261',
 	'1998-05-15',
 	'2024-09-11',
 	'2024-09-11T09:00:00.000Z',
-	'5B7F34', 1),
+	'5B7F34'
+	),
 	(8,
 	'Carlos Alberto Silva',
 	'CarlosSilva34',
@@ -107,11 +104,11 @@ VALUES
 	'$2a$10$8K.0ETBQRhu41sbIssQFsO',
 	'Amo programação e tecnologia.',
 	'carlos.silva@uea.edu.br', 120, 2,
-	'1811440262',
 	'2000-01-20',
 	'2024-09-11',
 	'2024-09-11T09:30:00.000Z',
-	'AD4D4D', 1),
+	'AD4D4D'
+	),
 	(9,
 	'Júlia Martins',
 	'JuliaMartins77',
@@ -119,11 +116,11 @@ VALUES
 	'$2a$10$8K.0ETBQRhu41sbIssQFsO',
 	'Estudante de Biologia e amante da natureza!',
 	'julia.martins@uea.edu.br', 80, 1,
-	'1811440263',
 	'2001-02-28',
 	'2024-09-11',
 	'2024-09-11T10:00:00.000Z',
-	'7D63C2', 1),
+	'7D63C2'
+	),
 	(10,
 	'Felipe Souza Lima',
 	'FelipeSouza44',
@@ -131,11 +128,11 @@ VALUES
 	'$2a$10$8K.0ETBQRhu41sbIssQFsO',
 	'Curioso sobre tudo e estudante de Física.',
 	'felipe.souza@uea.edu.br', 150, 3,
-	'1811440264',
 	'1997-08-10',
 	'2024-09-11',
 	'2024-09-11T10:30:00.000Z',
-	'E09560',1),
+	'E09560'
+	),
 	(11,
 	'Mariana Gomes',
 	'MariGomes10',
@@ -143,11 +140,11 @@ VALUES
 	'$2a$10$8K.0ETBQRhu41sbIssQFsO',
 	'Estudante de Psicologia, sempre em busca de autoconhecimento.',
 	'mariana.gomes@uea.edu.br', 30, 1,
-	'1811440265',
 	'1999-11-25',
 	'2024-09-11',
 	'2024-09-11T11:00:00.000Z',
-	'789BC0',1);
+	'789BC0'
+	);
 ALTER SEQUENCE usuario_id_seq RESTART WITH 12;
 
 INSERT INTO turma("id",
@@ -250,15 +247,14 @@ VALUES
 	(1,
 	'Atividade Exemplo 1',
 	'Atividade de exemplo.',
-	'2025-09-01T00:00:00.000Z', 1),
+	'2025-11-01T00:00:00.000Z', 1),
 	(2,
 	'Atividade Exemplo 2',
 	'Atividade de exemplo.',
-	'2025-09-01T00:00:00.000Z', 1);
+	'2025-11-01T00:00:00.000Z', 1);
 ALTER SEQUENCE atividade_id_seq RESTART WITH 3;
 
 INSERT INTO item_atividade(
-	"id", 
 	"titulo",
 	"descricao",
 	"nota_max",
@@ -268,30 +264,25 @@ INSERT INTO item_atividade(
 	"tipo_avaliacao_nota",
 	"em_grupos",
 	"receber_apos_prazo",
-	"status",
 	"id_atividade",
 	"tipo_formacao_grupo") 
 VALUES
-	(1, 
-	'Exemplo Média Simples',
+	('Exemplo Média Simples',
 	'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus nisi ipsum, pulvinar vel felis at, finibus malesuada erat. Proin nulla neque, pretium eget purus quis, dapibus aliquet ex. Proin porta vitae lacus ut varius. Nam tincidunt accumsan aliquet. Donec eu nunc imperdiet, sollicitudin ante in, finibus ligula. Mauris et erat sed arcu faucibus vestibulum. Vivamus metus ex, bibendum nec elit at, rutrum porta magna. Duis dapibus ligula ut libero viverra porta. Praesent mi risus, imperdiet sit amet molestie at, fringilla eget dolor. Quisque eu finibus turpis.', 4,
 	'2025-10-13T20:00:00.000Z',
-	'2025-10-13T20:00:00.000Z', 1, 1, false, false, 1, 1, NULL),
-	(2,
-	'Exemplo Média Ponderada',
+	'2025-10-13T20:00:00.000Z', 1, 1, false, false, 1, NULL),
+	('Exemplo Média Ponderada',
 	'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus nisi ipsum, pulvinar vel felis at, finibus malesuada erat. Proin nulla neque, pretium eget purus quis, dapibus aliquet ex. Proin porta vitae lacus ut varius. Nam tincidunt accumsan aliquet. Donec eu nunc imperdiet, sollicitudin ante in, finibus ligula. Mauris et erat sed arcu faucibus vestibulum. Vivamus metus ex, bibendum nec elit at, rutrum porta magna. Duis dapibus ligula ut libero viverra porta. Praesent mi risus, imperdiet sit amet molestie at, fringilla eget dolor. Quisque eu finibus turpis.', 4,
 	'2025-07-13T20:00:00.000Z',
-	'2026-07-28T20:00:00.000Z', 2, 1, false, false, 2, 1, NULL),
-	(3,
-	'Exemplo em Grupos',
+	'2026-07-28T20:00:00.000Z', 2, 1, false, false, 1, NULL),
+	('Exemplo em Grupos',
 	'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus nisi ipsum, pulvinar vel felis at, finibus malesuada erat. Proin nulla neque, pretium eget purus quis, dapibus aliquet ex. Proin porta vitae lacus ut varius. Nam tincidunt accumsan aliquet. Donec eu nunc imperdiet, sollicitudin ante in, finibus ligula. Mauris et erat sed arcu faucibus vestibulum. Vivamus metus ex, bibendum nec elit at, rutrum porta magna. Duis dapibus ligula ut libero viverra porta. Praesent mi risus, imperdiet sit amet molestie at, fringilla eget dolor. Quisque eu finibus turpis.', 4,
 	'2025-03-20T20:00:00.000Z',
-	'2025-03-28T20:00:00.000Z', 1, 2, true, false, 3, 1, NULL),
-	(4,
-	'Exemplo em Grupos (aval. individual)',
+	'2025-03-28T20:00:00.000Z', 1, 2, true, false, 1, NULL),
+	('Exemplo em Grupos (aval. individual)',
 	'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus nisi ipsum, pulvinar vel felis at, finibus malesuada erat. Proin nulla neque, pretium eget purus quis, dapibus aliquet ex. Proin porta vitae lacus ut varius. Nam tincidunt accumsan aliquet. Donec eu nunc imperdiet, sollicitudin ante in, finibus ligula. Mauris et erat sed arcu faucibus vestibulum. Vivamus metus ex, bibendum nec elit at, rutrum porta magna. Duis dapibus ligula ut libero viverra porta. Praesent mi risus, imperdiet sit amet molestie at, fringilla eget dolor. Quisque eu finibus turpis.', 4,
 	'2025-03-20T20:00:00.000Z',
-	'2025-03-28T20:00:00.000Z', 1, 1, true, false, 3, 1, NULL);
+	'2025-03-28T20:00:00.000Z', 1, 1, true, false, 1, NULL);
 ALTER SEQUENCE item_atividade_id_seq RESTART WITH 5;
 
 INSERT INTO entrega (
@@ -468,9 +459,13 @@ INSERT INTO realizar_avaliacao(id_entrega) VALUES
 (8);
 ALTER SEQUENCE realizar_avaliacao_id_seq RESTART WITH 7;
 
-INSERT INTO avaliacao_criterio (nota_atribuida, id_realizar_avaliacao, id_criterio) VALUES
+INSERT INTO avaliacao_criterio("nota_atribuida", "id_realizar_avaliacao", "id_criterio") VALUES
 (4.5, 5, 5),
 (5, 5, 6),
 (4.5, 6, 5),
 (5, 6, 6);
 ALTER SEQUENCE avaliacao_criterio_id_seq RESTART WITH 13;
+
+INSERT INTO config("chave", "valor") VALUES
+('MAX_ETAPAS_POR_ATIVIDADE', '5');
+

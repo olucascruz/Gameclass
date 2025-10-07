@@ -14,9 +14,9 @@
 	import Page from '../atividades/+page.svelte';
 	import selectedTurmaTabBar from '$src/stores/selectedTurmaTabBar.js';
 
-	let textoPublicacao = '';
-	let arquivos = [];
-	export let data;
+	let textoPublicacao = $state('');
+	let arquivos = $state([]);
+	let { data } = $props();
 
 	if (!$selectedTurmaTabBar) {
 		$selectedTurmaTabBar = 0;
@@ -31,7 +31,7 @@
 		timezone: 'America/Manaus'
 	};
 
-	$: publicacoes = data.publicacoes;
+	let publicacoes = $derived(data.publicacoes);
 
 	function validaFormPublicacao() {
 		if (!textoPublicacao || textoPublicacao == '') {
@@ -96,7 +96,7 @@
 					<input
 						id="inputFiles"
 						name="inputFiles"
-						on:change={handleArquivos}
+						onchange={handleArquivos}
 						accept="image/*, .pdf, .doc, .docx, .py, .c, cpp, .js, .html, .css"
 						type="file"
 						style="display: none;"
@@ -120,7 +120,9 @@
 
 				<div class="publicacao-content">
 					<div class="row">
-						<p><b>{publicacao.autor}<b></b></b></p>
+						<p class="autor-publicacao" style:color="#{publicacao.cor_autor}">
+							<b>{publicacao.autor}<b></b></b>
+						</p>
 						<p class="data-publicacao">
 							{new Date(publicacao.data_publicacao).toLocaleString('pt-BR', dateOptions)}
 						</p>
@@ -138,14 +140,16 @@
 						{#each publicacao.comentarios as comentario}
 							<div class="comentario-container">
 								<div class="comentario-icon">
-									<CircularTextIcon size="40" fontSize="25" backgroundColor="#{comentario.cor}">
+									<CircularTextIcon size="48" fontSize="25" backgroundColor="#{comentario.cor}">
 										{comentario.nome[0]}
 									</CircularTextIcon>
 								</div>
 
 								<div class="comentario-content">
 									<div class="row">
-										<p><b>{comentario.nome}<b></b></b></p>
+										<p class="autor-comentario" style:color="#{comentario.cor}">
+											<b>{comentario.nome}<b></b></b>
+										</p>
 										<p class="data-comentario">
 											{new Date(comentario.data_criacao).toLocaleString('pt-BR', dateOptions)}
 										</p>
@@ -190,6 +194,7 @@
 
 <style scoped>
 	.content-mural {
+		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -232,6 +237,7 @@
 
 	.publicacao-container,
 	.comentario-container {
+		box-sizing: border-box;
 		display: flex;
 		flex-direction: row;
 		width: 100%;
@@ -256,25 +262,29 @@
 
 	.publicacao-content,
 	.comentario-content {
+		word-wrap: break-word;
+		overflow: hidden;
+		box-sizing: border-box;
 		width: 100%;
+		text-wrap: pretty;
 	}
 
 	.data-publicacao,
 	.data-comentario {
-		font-size: 16px;
+		font-size: 24px;
 		color: var(--cor-secundaria);
 	}
 
-	.conteudo-publicacao,
-	.conteudo-comentario {
+	.conteudo-publicacao {
 		width: 100%;
 		padding-top: 4px;
 		min-height: 40px;
-		font-size: 18px;
+		font-size: 22px;
 	}
 
 	.conteudo-comentario {
 		min-height: 0px;
+		font-size: 20px;
 	}
 
 	.input-comentario {
@@ -317,7 +327,12 @@
 		cursor: pointer;
 	}
 
-	.anexo-container {
+	.autor-publicacao {
+		font-size: 22px;
+	}
+
+	.autor-comentario {
+		font-size: 22px;
 	}
 
 	.input-anexos {

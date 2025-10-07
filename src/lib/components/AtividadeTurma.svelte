@@ -7,18 +7,22 @@
 	import icon_seta_baixo from '$lib/assets/icon_seta_baixo.png';
 	import EtapaSubMenu from './EtapaSubMenu.svelte';
 	import { goto } from '$app/navigation';
-
 	import Atividade from '$lib/models/Atividade.js';
+	import { ArchiveIcon, EditIcon } from 'svelte-feather-icons';
+	import ButtonRedirect from './ButtonRedirect.svelte';
+	import Modal from '$lib/components/Modal.svelte';
 
-	export let atividade;
-	export let idTurma;
-	let width = 0;
-	let toggled = false;
+	let { atividade, idTurma, maxEtapas } = $props();
+	let showModal = $state(false);
+	let atividadeParaArquivar = $state();
+	let width = $state(0);
+	let toggled = $state(false);
+
 	const prazoFinalStr = new Atividade(atividade).formataPrazo();
 	const segments = [];
 
 	const total_etapas_concluidas = atividade.itens_atividade.filter(
-		(i) => i.data_entrega_final <= Date.now()
+		(i) => i.data_entrega_final <= Date.now() && i.avaliacoesPendentes == 0
 	).length;
 	if (total_etapas_concluidas > 0) {
 		segments.push({
@@ -30,15 +34,31 @@
 		});
 	}
 
+	const total_etapas_pendentes = atividade.itens_atividade.filter(
+		(i) => i.avaliacoesPendentes > 0
+	).length;
+	if (total_etapas_pendentes > 0) {
+		segments.push({
+			name: 'etapas_pendentes',
+			descricao: 'Etapas com avaliações pendentes',
+			backgroundColor: 'var(--cor-secundaria-2)',
+			color: 'black',
+			value: total_etapas_pendentes
+		});
+	}
+
 	const total_etapas_abertas = atividade.itens_atividade.filter(
-		(i) => i.data_entrega_inicial <= Date.now() && i.data_entrega_final >= Date.now()
+		(i) =>
+			i.data_entrega_inicial <= Date.now() &&
+			i.data_entrega_final >= Date.now() &&
+			i.avaliacoesPendentes == 0
 	).length;
 	if (total_etapas_abertas > 0) {
 		segments.push({
 			name: 'etapas_abertas',
-			descricao: 'Etapas em andamento',
-			backgroundColor: 'var(--cor-secundaria-2)',
-			color: 'black',
+			descricao: 'Etapas abertas para envio',
+			backgroundColor: 'var(--cor-primaria)',
+			color: 'white',
 			value: total_etapas_abertas
 		});
 	}
@@ -50,8 +70,8 @@
 		segments.push({
 			name: 'etapas_a_lancar',
 			descricao: 'Etapas agendadas para o futuro',
-			backgroundColor: 'var(--cor-primaria)',
-			color: 'white',
+			backgroundColor: 'var(--cor-secundaria)',
+			color: 'black',
 			value: total_etapas_a_lancar
 		});
 	}
@@ -65,8 +85,60 @@
 			value: 0
 		});
 	}
+
+	function comparaItemAtividade(a, b) {
+		return a.id - b.id;
+	}
+
+	function handleArquivaAtividade(item) {
+		showModal = true;
+		atividadeParaArquivar = item;
+	}
+
+	async function confirmaModalArquivarItemAtividade() {
+		console.debug('Arquiva item atividade ' + atividadeParaArquivar);
+		try {
+			const response = await fetch(`/api/atividade/${atividadeParaArquivar}/arquivar`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
+				throw new Error(errorData.message || `Erro ${response.status}: Falha ao arquivar o item.`);
+			}
+		} catch (error) {
+			console.error('Erro ao arquivar atividade:', error);
+		}
+
+		window.location.reload();
+		showModal = false;
+	}
 </script>
 
+<Modal
+	visible={showModal}
+	title="Atenção"
+	message="Deseja realmente arquivar o item?"
+	buttons={[
+		{
+			label: 'Sim',
+			onClick: async () => {
+				await confirmaModalArquivarItemAtividade();
+			},
+			color: 'green'
+		},
+		{
+			label: 'Não',
+			onClick: () => {
+				showModal = false;
+			},
+			color: 'red'
+		}
+	]}
+/>
 <div
 	class={toggled ? 'atividade-container-toggled' : 'atividade-container'}
 	bind:clientWidth={width}
@@ -74,7 +146,7 @@
 	<div
 		class="atividade-info"
 		aria-hidden="true"
-		on:click={() => {
+		onclick={() => {
 			toggled = toggled ? false : true;
 		}}
 	>
@@ -84,9 +156,23 @@
 		<div class="atividade-info-content">
 			<CircularIcon src={icon_atividade_turma} alt="Ícone de atividades da turma" />
 			<div class="column">
-				<h2>{atividade.titulo}</h2>
+				<h2 class="titulo">{atividade.titulo}</h2>
 			</div>
-			<span>Prazo: {prazoFinalStr}</span>
+			<div class="column right">
+				<span>Prazo: {prazoFinalStr}</span>
+				<div class="botoes">
+					{#if toggled}
+						<ButtonRedirect href="atividades/{atividade.id}/edit" color="white"
+							><EditIcon size="24" /></ButtonRedirect
+						>
+						<Button
+							backgroundColor="var(--cor-secundaria)"
+							on:click={() => handleArquivaAtividade(atividade.id)}
+							color="white"><ArchiveIcon size="24" /></Button
+						>
+					{/if}
+				</div>
+			</div>
 			{#if toggled}
 				<img src={icon_seta_cima} alt="Seta para abrir a turma" />
 			{:else}
@@ -94,29 +180,28 @@
 			{/if}
 		</div>
 	</div>
-	<!-- TODO: Etapas as component (parameter: list of etapas)-->
 	{#if toggled}
 		<div class="etapas">
 			<h2>Etapas</h2>
 			{#if atividade.itens_atividade.length === 0}
 				<h3 style="align-self: center; margin: 8px;">(Não há etapas nessa atividade)</h3>
 			{/if}
-			{#each atividade.itens_atividade as itemAtividade}
+			{#each atividade.itens_atividade.sort(comparaItemAtividade) as itemAtividade}
 				<hr />
 				<div class="etapas-container">
 					<EtapaSubMenu {itemAtividade} {idTurma} idAtividade={atividade.id} />
 				</div>
 			{/each}
-			<!-- TODO: Toggle Button para abrir as etapas -->
 			<div class="button">
 				<Button
 					on:click={() => {
 						// TODO: Get id disponivel para etapa
-						goto(`atividades/create/etapas/${atividade.id}/`); // TODO: utilziar id dinamico da turma e da etapa
+						goto(`atividades/create/etapas/?idAtividade=${atividade.id}`); // TODO: utilziar id dinamico da turma e da etapa
 					}}
 					color="white"
 					backgroundColor="var(--cor-primaria)"
 					marginTop="24px"
+					disabled={atividade.itens_atividade.length >= maxEtapas}
 					fontSize="16px">+ Adicionar Etapa</Button
 				>
 			</div>
@@ -126,12 +211,12 @@
 
 <style>
 	.atividade-container {
-		width: 50%;
+		width: 70%;
 		margin-bottom: 24px;
 	}
 
 	.atividade-container-toggled {
-		width: 50%;
+		width: 70%;
 		margin-bottom: 24px;
 		padding: 8px;
 		border: 2px solid var(--input-border);
@@ -162,6 +247,11 @@
 		align-self: center;
 	}
 
+	.botoes {
+		display: flex;
+		flex-direction: row;
+	}
+
 	/* button { */
 	/* 	background: none; */
 	/* 	color: inherit; */
@@ -174,17 +264,32 @@
 
 	.atividade-info-content > span {
 		margin-left: auto;
-		font-size: 1.2em;
 	}
 
 	.atividade-info-content > img {
 		margin-left: 12px;
 	}
 
+	.titulo {
+		max-width: 500px;
+	}
+
 	.column {
 		margin-left: 24px;
 		display: flex;
 		flex-direction: column;
+	}
+
+	.right {
+		margin-left: auto;
+		font-size: 1.2em;
+	}
+
+	.botoes {
+		display: flex;
+		gap: 4px;
+		margin-top: 8px;
+		justify-content: center;
 	}
 
 	.etapas {
@@ -194,7 +299,7 @@
 	}
 
 	.etapas-container {
-		width: 90%;
+		width: 100%;
 		display: flex;
 		flex-direction: column;
 		align-self: center;

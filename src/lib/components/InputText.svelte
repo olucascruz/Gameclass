@@ -1,14 +1,37 @@
 <script>
-	export let placeholder = '';
-	export let value;
-	export let inputHandler;
-	export let name;
-	export let width;
-	export let fontSize;
-	export let borded = false;
-	export let backgroundColor = 'var(--cor-primaria)';
-	export let padding = '14px';
-	export let fontWeight = '400';
+	import { createBubbler } from 'svelte/legacy';
+
+	const bubble = createBubbler();
+	/**
+	 * @typedef {Object} Props
+	 * @property {string} [placeholder]
+	 * @property {any} value
+	 * @property {any} inputHandler
+	 * @property {any} name
+	 * @property {any} width
+	 * @property {any} fontSize
+	 * @property {boolean} [borded]
+	 * @property {string} [backgroundColor]
+	 * @property {string} [padding]
+	 * @property {string} [fontWeight]
+	 * @property {boolean} [disabled]
+	 */
+
+	/** @type {Props & { [key: string]: any }} */
+	let {
+		placeholder = '',
+		value = $bindable(),
+		inputHandler,
+		name,
+		width,
+		fontSize,
+		borded = false,
+		backgroundColor = 'var(--cor-primaria)',
+		padding = '14px',
+		fontWeight = '400',
+		disabled = false,
+		...rest
+	} = $props();
 </script>
 
 {#if borded}
@@ -21,11 +44,12 @@
 			type="text"
 			{name}
 			{placeholder}
+			{disabled}
 			bind:value
-			on:input={inputHandler}
-			on:blur
+			oninput={inputHandler}
+			onblur={bubble('blur')}
 			style="width: {width};background-color: {backgroundColor}; font-size:{fontSize}; font-weight:{fontWeight}"
-			{...$$restProps}
+			{...rest}
 		/>
 	</div>
 {:else}
@@ -35,11 +59,12 @@
 			type="text"
 			{name}
 			{placeholder}
+			{disabled}
 			bind:value
-			on:input={inputHandler}
-			on:blur
+			oninput={inputHandler}
+			onblur={bubble('blur')}
 			style="width: {width}; font-size:{fontSize}"
-			{...$$restProps}
+			{...rest}
 		/>
 	</div>
 {/if}
@@ -73,6 +98,18 @@
 
 	input:focus {
 		outline: none;
+	}
+
+	input:disabled {
+		background-color: #f0f0f0; /* Um cinza claro padrão para desabilitado */
+		border-color: #dcdcdc;
+		color: #a1a1a1; /* Cor do texto mais clara */
+		cursor: not-allowed; /* Cursor indica que não é clicável */
+	}
+
+	/* Opcional: Estilizar também o placeholder do campo desabilitado */
+	input:disabled::placeholder {
+		color: #b3b3b3;
 	}
 
 	::placeholder {

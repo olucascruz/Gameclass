@@ -7,9 +7,10 @@
 	import icon_mais from '$lib/assets/icon_mais.png';
 	import icon_menos from '$lib/assets/icon_menos.png';
 	import { slide } from 'svelte/transition';
+	import { formataData } from '$lib/utils/util';
 
-	export let data;
-	let mostraAtividades = data.atividades.map(() => false);
+	let { data } = $props();
+	let mostraAtividades = $state(data.atividades.map(() => false));
 	const dateOptions = {
 		day: '2-digit',
 		month: '2-digit',
@@ -36,7 +37,8 @@
 					<div class="info">
 						<img src={icon_calendario} alt="ícone de calendário" />
 						<p>Criada em:</p>
-						<h3>{data.turma.data_criacao.toLocaleString('pt-BR', dateOptions)}</h3>
+						<!-- <h3>{data.turma.data_criacao.toLocaleString('pt-BR', dateOptions)}</h3> -->
+						<h3>{formataData(data.turma.data_criacao)}</h3>
 					</div>
 				</div>
 			</div>
@@ -66,7 +68,7 @@
 						<button
 							class="titulo-atividade"
 							style=""
-							on:click={() => (mostraAtividades[index] = !mostraAtividades[index])}
+							onclick={() => (mostraAtividades[index] = !mostraAtividades[index])}
 						>
 							<div class="titulo-atividade-content">
 								<h3>{atividade.titulo}</h3>
@@ -175,7 +177,8 @@
 	}
 
 	.titulo-atividade {
-		display: flex;
+		display: grid;
+		grid-template-columns: 1fr 28px;
 		width: 400px;
 		flex-direction: row;
 		justify-content: space-between;
@@ -188,9 +191,15 @@
 	}
 
 	.titulo-atividade-content {
-		display: flex;
+		display: grid;
+		grid-template-columns: 1;
 		flex-direction: row;
 		gap: 8px;
+	}
+
+	.titulo-atividade > img {
+		width: 28px;
+		height: 28px;
 	}
 
 	.atividade-content {

@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import CircularIcon from '$lib/components/CircularIcon.svelte';
 	import Comentario from '$lib/components/Comentario.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -12,22 +14,23 @@
 	import SwitchView from '$lib/components/SwitchView.svelte';
 	import EnvioEntregaGrade from '$lib/components/EnvioEntregaGrade.svelte';
 	import EnvioEntregaLista from '$lib/components/EnvioEntregaLista.svelte';
+	import CriteriosPopover from '$lib/components/CriteriosPopover.svelte';
 
-	export let data;
+	let { data } = $props();
 
-	let id;
-	let idAtividade;
-	let idEtapa;
-	let arquivos = [];
+	let id = $derived($page.params.id);
+	let idAtividade = $derived($page.params.idAtividade);
+	let idEtapa = $derived($page.params.idEtapa);
+	let arquivos = $state([]);
 	let arquivo = 'teste';
-	let currentView = data.visualizacao_entregas;
 
-	$: id = $page.params.id;
-	$: idAtividade = $page.params.idAtividade;
-	$: idEtapa = $page.params.idEtapa;
-	$: arquivos = [...arquivos, arquivo];
+	let currentView = $state(data.visualizacao_entregas || 'grade');
 
-	let entregas_por_estudante = [];
+	run(() => {
+		arquivos = [...arquivos, arquivo];
+	});
+
+	let entregas_por_estudante = $state([]);
 	let entregas_por_grupo = [];
 
 	if (data.etapa.em_grupos) {
@@ -51,7 +54,8 @@
 						grupo,
 						em_grupos: true,
 						estudante: null,
-						prazo: data.etapa.data_entrega_final
+						prazo: data.etapa.data_entrega_final,
+						inicio: data.etapa.data_entrega_inicial
 					});
 				} else {
 					entregas_por_grupo.push({
@@ -59,7 +63,8 @@
 						grupo: grupo,
 						em_grupos: true,
 						estudante: null,
-						prazo: data.etapa.data_entrega_final
+						prazo: data.etapa.data_entrega_final,
+						inicio: data.etapa.data_entrega_inicial
 					});
 				}
 			} else {
@@ -68,7 +73,8 @@
 					grupo: null,
 					em_grupos: true,
 					estudante: null,
-					prazo: data.etapa.data_entrega_final
+					prazo: data.etapa.data_entrega_final,
+					inicio: data.etapa.data_entrega_inicial
 				});
 			}
 		}
@@ -83,7 +89,8 @@
 						entrega: entrega,
 						grupo: null,
 						em_grupos: false,
-						prazo: data.etapa.data_entrega_final
+						prazo: data.etapa.data_entrega_final,
+						inicio: data.etapa.data_entrega_inicial
 					};
 				}
 
@@ -92,7 +99,8 @@
 					entrega: null,
 					grupo: null,
 					em_grupos: false,
-					prazo: data.etapa.data_entrega_final
+					prazo: data.etapa.data_entrega_final,
+					inicio: data.etapa.data_entrega_inicial
 				};
 			})
 			.sort((a, b) => a.estudante.nome.localeCompare(b.estudante.nome));
@@ -130,15 +138,16 @@
 
 <div class="content-etapa">
 	<div class="content-header">
-		<h1>{data.atividade.titulo}</h1>
-		<h2>Etapa: {data.etapa.titulo}</h2>
+		<h1>{data.etapa.titulo}</h1>
+		<h2>Atividade: {data.atividade.titulo}</h2>
 	</div>
 	<div class="content-data">
 		<p>{data.etapa.descricao}</p>
 		<AtividadeInfo data={atividadeInfo} />
+		<CriteriosPopover criterios={data.etapa.criterios} />
 		<div class="container-entregas">
 			<div class="entregas-header">
-				<SwitchView bind:view={currentView} />
+				<SwitchView bind:view={currentView} preferenceKey="visualizacao_entregas" />
 				<p>Entregas:</p>
 			</div>
 			{#if currentView == 'grade'}
@@ -193,7 +202,6 @@
 		flex-direction: column;
 		text-align: center;
 		padding-top: 64px;
-		padding-right: 96px;
 	}
 
 	.content-header {
@@ -202,9 +210,12 @@
 	}
 
 	.content-data {
+		display: flex;
+		flex-direction: column;
 		padding-top: 36px;
 		padding-left: 96px;
 		padding-right: 96px;
+		gap: 8px;
 	}
 
 	.content-data > p {

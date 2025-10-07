@@ -1,10 +1,24 @@
 <script>
-	export let text, name, checked;
+	/**
+	 * @typedef {Object} Props
+	 * @property {any} text
+	 * @property {any} name
+	 * @property {any} checked
+	 * @property {boolean} [disabled]
+	 */
+
+	/** @type {Props} */
+	let {
+		text,
+		name,
+		checked = $bindable(),
+		disabled = false
+	} = $props();
 </script>
 
 <div class="container">
 	<div class="row">
-		<input {name} type="checkbox" value={text} bind:checked />
+		<input {name} type="checkbox" {disabled} value={text} bind:checked />
 		<p>{text}</p>
 	</div>
 </div>

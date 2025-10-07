@@ -1,16 +1,17 @@
 <script>
-	export let optionList;
-	export let inputHandler;
-	export let value;
-	export let name = '';
-	export let borded = false;
-	export let unselectedText = '';
-	export let width;
+	let {
+		optionList,
+		inputHandler,
+		value = $bindable(),
+		name = '',
+		borded = false,
+		unselectedText = '',
+		width
+	} = $props();
 </script>
 
 {#if borded}
-	<!-- <div class="board"> -->
-	<select class="boarded" style="width: {width}px;" on:change={inputHandler} bind:value {name}>
+	<select class="borded" style="width: {width}px;" onchange={inputHandler} bind:value {name}>
 		{#if unselectedText != ''}
 			<option value="" disabled selected>{unselectedText}</option>
 		{/if}
@@ -18,9 +19,8 @@
 			<option class="option">{opt}</option>
 		{/each}
 	</select>
-	<!-- </div> -->
 {:else}
-	<select class="unborded" style="width: {width}px;" on:change={inputHandler} bind:value {name}>
+	<select class="unborded" style="width: {width}px;" onchange={inputHandler} bind:value {name}>
 		{#if unselectedText != ''}
 			<option value="" disabled selected>{unselectedText}</option>
 		{/if}
@@ -31,7 +31,7 @@
 {/if}
 
 <style>
-	.boarded {
+	.borded {
 		background-color: var(--cor-primaria);
 		padding: 14px;
 		border-radius: 12px;

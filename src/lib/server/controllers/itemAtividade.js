@@ -6,7 +6,9 @@ import {
 	removeItemAtividadePorIdBD,
 	listaCriteriosPorIdItemAtividadeBD,
 	listaNotasDeCriteriosPorIdItemAtividadeBD,
-	possuiAvaliacoesPendentesBD
+	possuiAvaliacoesPendentesBD,
+	alteraItemAtividadeBD,
+	arquivaItemAtividadePorIdBD
 } from "../repositories/itemAtividade";
 
 import ItemAtividade from "$lib/models/ItemAtividade.js";
@@ -86,7 +88,7 @@ export default class ItemAtividadeController {
 
 		for (const c of criterios) {
 			try {
-				await criterioController.cadastra(c.titulo, c.descricao, c.nota_max, c.peso, idItemAtividade);
+				await criterioController.cadastra(c.titulo, c.descricao, c.pontuacao_max, c.peso, idItemAtividade);
 			} catch (e) {
 				throw `Erro ao cadastrar critério: ${e}`;
 			}
@@ -94,6 +96,46 @@ export default class ItemAtividadeController {
 
 		if (res.rowCount > 0) {
 			return res.rows[0].id
+		}
+	}
+
+	async altera(
+		{ id,
+			titulo,
+			descricao,
+			data_entrega_inicial,
+			data_entrega_final }
+	) {
+		const camposFaltando = [];
+
+		if (!id) {
+			camposFaltando.push('idItemAtividade');
+		}
+		if (!titulo) {
+			camposFaltando.push('titulo');
+		}
+		if (!data_entrega_inicial) {
+			camposFaltando.push('dataEntregaInicial');
+		}
+		if (!data_entrega_final) {
+			camposFaltando.push('dataEntregaFinal');
+		}
+
+		if (camposFaltando.length > 0) {
+			throw `Os seguintes campos obrigatórios não foram preenchidos ou são inválidos: ${camposFaltando.join(', ')}. (Item Atividade)`;
+		}
+
+		let res;
+		res = await alteraItemAtividadeBD(
+			id,
+			titulo,
+			descricao,
+			data_entrega_inicial,
+			data_entrega_final,
+		);
+
+		if (res.rowCount > 0) {
+			return true
 		}
 	}
 
@@ -118,7 +160,12 @@ export default class ItemAtividadeController {
 		}
 
 		const res = await buscaItemAtividadePorTituloBD(titulo, idAtividadePai);
-		return res.map((item) => new ItemAtividade(item));
+		console.debug("res => ", res)
+		if (res) {
+			return res.map((item) => new ItemAtividade(item));
+		}
+
+		return [];
 	}
 
 	async listaPorIdAtividade(idAtividadePai) {
@@ -163,11 +210,11 @@ export default class ItemAtividadeController {
 		} else if (now < itemAtividade.data_entrega_inicial) {
 			status = 1
 
-		} else if (now <= itemAtividade.data_entrega_final) {
-			status = 2
-
 		} else if (possuiAvaliacoesPendentes != 0) {
 			status = 3
+
+		} else if (now <= itemAtividade.data_entrega_final) {
+			status = 2
 
 		} else {
 			status = 4
@@ -193,16 +240,20 @@ export default class ItemAtividadeController {
 		return await listaNotasDeCriteriosPorIdItemAtividadeBD(idItemAtividade);
 	}
 
-
 	async possuiAvaliacoesPendentes(idItemAtividade) {
 		if (!idItemAtividade) {
 			throw "Dados obrigatórios não foram preenchidos. (possuiAvaliacoesPendentes)";
 		}
 
 		const res = await possuiAvaliacoesPendentesBD(idItemAtividade);
-
 		return res.pendencias
-
 	}
 
+	async arquivar(idItemAtividade) {
+		if (!idItemAtividade) {
+			throw "Dados obrigatórios não foram preenchidos. (possuiAvaliacoesPendentes)";
+		}
+
+		return await arquivaItemAtividadePorIdBD(idItemAtividade);
+	}
 }

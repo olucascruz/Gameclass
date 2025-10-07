@@ -4,11 +4,54 @@
 	import CircularTextIcon from '$lib/components/CircularTextIcon.svelte';
 	import selectedTurmaTabBar from '$src/stores/selectedTurmaTabBar.js';
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 
-	export let data;
+	let { data } = $props();
 
+	// Estado para as preferências do usuário, inicializado com padrões seguros para o servidor.
+	let sortBy = $state('name');
+	let viewMode = $state('grid');
 
-	let estudantes = data.estudantes;
+	// Esta variável irá conter a lista final e ordenada para renderização.
+	let estudantes = $state([]);
+
+	// Estado para controlar a renderização e evitar problemas de hidratação.
+	let isMounted = $state(false);
+
+	// No onMount (apenas no lado do cliente), carrega as preferências e atualiza o estado.
+	onMount(() => {
+		sortBy = localStorage.getItem('membrosSortBy') || 'name';
+		viewMode = localStorage.getItem('membrosViewMode') || 'grid';
+		isMounted = true; // Sinaliza que agora estamos seguros no cliente com o estado carregado.
+	});
+
+	// Este efeito é executado sempre que os dados de origem ou a preferência de ordenação mudam.
+	// Ele recalcula a lista ordenada.
+	$effect(() => {
+		if (!data.estudantes) {
+			estudantes = [];
+			return;
+		}
+		const estudantesCopia = [...data.estudantes];
+		if (sortBy === 'points') {
+			estudantesCopia.sort((a, b) => b.pontos - a.pontos);
+		} else {
+			// 'name'
+			estudantesCopia.sort((a, b) => a.nome.localeCompare(b.nome));
+		}
+		estudantes = estudantesCopia;
+	});
+
+	// Este efeito salva as preferências de volta no localStorage.
+	// Ele só é executado depois que o componente é montado, para evitar sobrescrever os valores armazenados com os padrões.
+	$effect(() => {
+		if (isMounted) {
+			localStorage.setItem('membrosSortBy', sortBy);
+			localStorage.setItem('membrosViewMode', viewMode);
+		}
+	});
+
 	if (!$selectedTurmaTabBar) {
 		$selectedTurmaTabBar = 3;
 	}
@@ -17,51 +60,63 @@
 		const url = `/professor/turmas/${data.idTurma}/membros/${estudante.id_estudante}`;
 		goto(url);
 	}
-	let sortBy = 'points'; // 'points' ou 'name'
-
-	function ordenaPorPontos() {
-		sortBy = 'points';
-		estudantes = estudantes.sort((a, b) => b.pontos - a.pontos);
-	}
-
-	function ordenaPorNome() {
-		sortBy = 'name';
-		estudantes = estudantes.sort((a, b) => a.nome.localeCompare(b.nome));
-	}
-
-	ordenaPorNome();
 </script>
 
 <Toaster richColors position="top-center" closeButton />
 <TurmaTabBar />
 <div class="content-membros">
 	<h1>Membros da turma</h1>
-	<div class="sort-buttons">
-		<span>Ordenar por:</span>
-		<button on:click={ordenaPorNome} class:active={sortBy === 'name'}> Nome (A-Z) </button>
-		<button on:click={ordenaPorPontos} class:active={sortBy === 'points'}>
-			Pontos (Decrescente)
-		</button>
-	</div>
-	<div class="membros-container">
-		{#each estudantes as estudante}
-			<button
-				class="membro-container"
-				on:click={() => {
-					abrePerfilDoUsuario(estudante);
-				}}
-			>
-				<div class="membro-icon">
-					<CircularTextIcon backgroundColor="#{estudante.cor}">{estudante.nome[0]}</CircularTextIcon
-					>
+
+	{#if data.estudantes.length == 0}
+		<h2>(Não há estudantes na turma)</h2>
+	{:else}
+		<div class="filtros">
+			<!-- Container para todos os controles de filtro e visualização -->
+			<div class="controls-container">
+				<div class="sort-buttons">
+					<span>Ordenar por:</span>
+					<button onclick={() => (sortBy = 'name')} class:active={sortBy === 'name'}>
+						Nome (A-Z)
+					</button>
+					<button onclick={() => (sortBy = 'points')} class:active={sortBy === 'points'}>
+						Pontos (Decrescente)
+					</button>
 				</div>
-				<div class="membro-info">
-					<p class="membro-nome">{estudante.nome}</p>
-					<p class="membro-pontuacao">{estudante.pontos} pontos</p>
+
+				<div class="view-buttons">
+					<span>Exibir como:</span>
+					<button onclick={() => (viewMode = 'grid')} class:active={viewMode === 'grid'}>
+						Grade
+					</button>
+					<button onclick={() => (viewMode = 'list')} class:active={viewMode === 'list'}>
+						Lista
+					</button>
 				</div>
-			</button>
-		{/each}
-	</div>
+			</div>
+		</div>
+
+		<!-- Container dos membros com classe dinâmica para o modo de visualização -->
+		<div class="membros-container" class:list={viewMode === 'list'}>
+			{#each estudantes as estudante}
+				<button
+					class="membro-container"
+					onclick={() => {
+						abrePerfilDoUsuario(estudante);
+					}}
+				>
+					<div class="membro-icon">
+						<CircularTextIcon backgroundColor="#{estudante.cor}"
+							>{estudante.nome[0]}</CircularTextIcon
+						>
+					</div>
+					<div class="membro-info">
+						<p class="membro-nome">{estudante.nome}</p>
+						<p class="membro-pontuacao">{estudante.pontos} pontos</p>
+					</div>
+				</button>
+			{/each}
+		</div>
+	{/if}
 </div>
 
 <style scoped>
@@ -74,13 +129,30 @@
 		padding: 24px 128px;
 	}
 
+	.controls-container {
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		width: 100%;
+		gap: 2rem;
+		flex-wrap: wrap;
+	}
+
+	/* Estilo padrão em Grade */
 	.membros-container {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 		gap: 24px;
 		width: 100%;
-		margin-top: 48px;
+		margin-top: 24px;
 		color: white;
+	}
+
+	/* Modificador para visualização em Lista */
+	.membros-container.list {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
 	}
 
 	.membro-container {
@@ -94,29 +166,40 @@
 		padding: 12px 12px 12px 0px;
 		border: none;
 		cursor: pointer;
+		transition: transform 0.2s ease-in-out;
 	}
 
-	.sort-buttons {
-		margin-bottom: 1.5rem;
+	.membro-container:hover {
+		transform: translateY(-4px);
+	}
+
+	.sort-buttons,
+	.view-buttons {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
 	}
 
-	.sort-buttons button {
+	.sort-buttons button,
+	.view-buttons button {
 		padding: 0.5rem 1rem;
 		border: 1px solid #ccc;
 		background-color: #f0f0f0;
 		cursor: pointer;
 		border-radius: 5px;
-		transition: background-color 0.2s;
+		font-family: var(--font);
+		transition:
+			background-color 0.2s,
+			color 0.2s;
 	}
 
-	.sort-buttons button:hover {
+	.sort-buttons button:hover,
+	.view-buttons button:hover {
 		background-color: #e0e0e0;
 	}
 
-	.sort-buttons button.active {
+	.sort-buttons button.active,
+	.view-buttons button.active {
 		background-color: #007bff;
 		color: white;
 		border-color: #007bff;
@@ -129,10 +212,8 @@
 
 	.membro-icon {
 		display: flex;
-		flex-direction: column;
 		align-items: center;
-		justify-content: start;
-		text-align: center;
+		justify-content: center;
 		padding: 0px 12px;
 	}
 
@@ -155,5 +236,11 @@
 	.membro-pontuacao {
 		color: darkgray;
 		font-size: 18px;
+	}
+
+	.filtros {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
 	}
 </style>

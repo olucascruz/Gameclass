@@ -4,14 +4,15 @@
 	import InputText from '$lib/components/InputText.svelte';
 	import InputDate from '$lib/components/InputDate.svelte';
 	import InputPassword from '$lib/components/InputPassword.svelte';
+	import InputDatetime from '$lib/components/InputDatetime.svelte';
 	import Select from '$lib/components/Select.svelte';
+	import SelectSearch from '$lib/components/SelectSearch.svelte';
 	import { PASSWORD_MAX_CHARACTERS, PASSWORD_MIN_CHARACTERS } from '$lib/constants.js';
 	import { enhance } from '$app/forms';
 	import { onMount } from 'svelte';
 	import InputTextArea from '$lib/components/InputTextArea.svelte';
 
-	export let data;
-	export let form;
+	let { data, form = $bindable() } = $props();
 
 	onMount(async () => {
 		if (data.message) {
@@ -19,44 +20,61 @@
 		}
 	});
 
-	let nomeCompleto,
-		login,
-		senha,
-		repetirSenha,
-		instituicao,
-		dtNasc,
-		bio,
-		email,
-		matriculaAluno = '';
+	let nomeCompleto = $state(),
+		login = $state(),
+		senha = $state(),
+		repetirSenha = $state(),
+		// instituicao = $state(),
+		dtNasc = $state(),
+		bio = $state(),
+		email = $state();
+	// matriculaAluno = $state('');
 
-	let nomeCompletoEmpty,
-		loginEmpty,
-		senhaEmpty,
-		repetirSenhaEmpty,
-		instituicaoEmpty,
-		dtNascEmpty,
-		emailEmpty,
-		matriculaAlunoEmpty = false;
+	let nomeCompletoEmpty = $state(),
+		loginEmpty = $state(),
+		senhaEmpty = $state(),
+		repetirSenhaEmpty = $state(),
+		// instituicaoEmpty = $state(),
+		dtNascEmpty = $state(),
+		emailEmpty = $state();
+	// matriculaAlunoEmpty = $state(false);
 
-	let senhasIncompativeis = false;
-	let erroSenhaTamanhoMinimo, erroSenhaTamanhoMaximo, erroSenhaCaracteres;
+	let senhasIncompativeis = $state(false);
+	let erroSenhaTamanhoMinimo = $state(),
+		erroSenhaTamanhoMaximo = $state(),
+		erroSenhaCaracteres = $state();
+	let dateNow = new Date();
+	let dateNowFormated = showISOAsGMT4(dateNow);
 
-	let selectOptionDict = data['instituicoes'];
-	let selectOptionList = selectOptionDict.map((instituicao) => instituicao.nome);
+	// let selectOptionDict = data['instituicoes'];
+	// let selectOptionList = selectOptionDict.map((instituicao) => instituicao.nome);
+
+	function showISOAsGMT4(isoUTC) {
+		const offsetMinutes = -4 * 60; // GMT-4
+		const utcDate = new Date(isoUTC);
+		const localDate = new Date(utcDate.getTime() + offsetMinutes * 60000);
+		const datetimeLocal = localDate.toISOString().slice(0, 16);
+
+		return datetimeLocal;
+	}
 
 	function aoCriarConta() {
+		console.debug('teste1');
 		if (!checkInputs()) return false;
+		console.debug('teste2');
 		if (!verificarRequisitosSenha()) return false;
+		console.debug('teste3');
 		if (!checkPasswords()) return false;
+		console.debug('teste4');
 
-		let instituicao_id = -1;
+		// let instituicao_id = -1;
 
-		for (let key in selectOptionDict) {
-			let inst = selectOptionDict[key];
-			if (inst['nome'] === instituicao) {
-				instituicao_id = inst['id'];
-			}
-		}
+		// for (let key in selectOptionDict) {
+		// 	let inst = selectOptionDict[key];
+		// 	if (inst['nome'] === instituicao) {
+		// 		instituicao_id = inst['id'];
+		// 	}
+		// }
 
 		return true;
 	}
@@ -80,10 +98,10 @@
 			repetirSenhaEmpty = true;
 			ok = false;
 		}
-		if (!instituicao) {
-			instituicaoEmpty = true;
-			ok = false;
-		}
+		// if (!instituicao) {
+		// 	instituicaoEmpty = true;
+		// 	ok = false;
+		// }
 		if (!dtNasc) {
 			dtNascEmpty = true;
 			ok = false;
@@ -92,10 +110,10 @@
 			emailEmpty = true;
 			ok = false;
 		}
-		if (!matriculaAluno) {
-			matriculaAlunoEmpty = true;
-			ok = false;
-		}
+		// if (!matriculaAluno) {
+		// 	matriculaAlunoEmpty = true;
+		// 	ok = false;
+		// }
 
 		return ok;
 	}
@@ -136,10 +154,13 @@
 	}
 
 	function loginInputHandler(e) {
+		console.debug('entrou');
 		if (e.target.value.length > 0) loginEmpty = false;
 		if (form) {
+			console.debug('entrou2');
 			form.already_registered = false;
 		}
+		console.debug('form.already_registered =>', form?.already_registered);
 	}
 
 	function nomeCompletoInputHandler(e) {
@@ -173,21 +194,23 @@
 		}
 	}
 
-	function instituicaoInputHandler(e) {
-		if (e.target.value.length > 0) instituicaoEmpty = false;
-	}
+	// function instituicaoInputHandler(e) {
+	// 	if (e.target.value.length > 0) instituicaoEmpty = false;
+	// }
 
 	function dtNascInputHandler(e) {
 		if (e.target.value.length > 0) dtNascEmpty = false;
+
+		console.debug('dtNasc => ', dtNasc);
 	}
 
 	function emailInputHandler(e) {
 		if (e.target.value.length > 0) emailEmpty = false;
 	}
 
-	function matriculaAlunoInputHandler(e) {
-		if (e.target.value.length > 0) matriculaAlunoEmpty = false;
-	}
+	// function matriculaAlunoInputHandler(e) {
+	// 	if (e.target.value.length > 0) matriculaAlunoEmpty = false;
+	// }
 </script>
 
 <div class="cadastro-container">
@@ -198,6 +221,7 @@
 		method="post"
 		use:enhance={({ cancel }) => {
 			if (!aoCriarConta() || form?.already_registered) {
+				console.debug('CANCELOU');
 				cancel();
 			}
 
@@ -235,19 +259,19 @@
 			{/if}
 		</div>
 
-		<div style="display:flex; flex-direction: column;">
-			<InputText
-				name="matriculaAluno"
-				placeholder="Matrícula Institucional"
-				bind:value={matriculaAluno}
-				inputHandler={matriculaAlunoInputHandler}
-			/>
-			{#if matriculaAlunoEmpty}
-				<span class="error" style="visibility: visible;">*Campo obrigatório</span>
-			{:else}
-				<span class="error" style="visibility: hidden;">*Campo obrigatório</span>
-			{/if}
-		</div>
+		<!-- <div style="display:flex; flex-direction: column;"> -->
+		<!-- 	<InputText -->
+		<!-- 		name="matriculaAluno" -->
+		<!-- 		placeholder="Matrícula Institucional" -->
+		<!-- 		bind:value={matriculaAluno} -->
+		<!-- 		inputHandler={matriculaAlunoInputHandler} -->
+		<!-- 	/> -->
+		<!-- 	{#if matriculaAlunoEmpty} -->
+		<!-- 		<span class="error" style="visibility: visible;">*Campo obrigatório</span> -->
+		<!-- 	{:else} -->
+		<!-- 		<span class="error" style="visibility: hidden;">*Campo obrigatório</span> -->
+		<!-- 	{/if} -->
+		<!-- </div> -->
 
 		<div style="display:flex; flex-direction: column;">
 			<InputText
@@ -308,23 +332,31 @@
 			{/if}
 		</div>
 
-		<div style="display:flex; flex-direction: column;">
-			<Select
-				name="instituicao"
-				optionList={selectOptionList}
-				inputHandler={instituicaoInputHandler}
-				bind:value={instituicao}
-			/>
-			{#if instituicaoEmpty}
-				<span class="error" style="visibility: visible;">*Campo obrigatório</span>
-			{:else}
-				<span class="error" style="visibility: hidden;">*Campo obrigatório</span>
-			{/if}
-		</div>
+		<!-- <div style="display:flex; flex-direction: column;"> -->
+		<!-- 	<SelectSearch -->
+		<!-- 		name="instituicao" -->
+		<!-- 		optionList={selectOptionList} -->
+		<!-- 		inputHandler={instituicaoInputHandler} -->
+		<!-- 		placeholder="Selecione uma instituição" -->
+		<!-- 		bind:value={instituicao} -->
+		<!-- 	/> -->
+		<!-- 	{#if instituicaoEmpty} -->
+		<!-- 		<span class="error" style="visibility: visible;">*Campo obrigatório</span> -->
+		<!-- 	{:else} -->
+		<!-- 		<span class="error" style="visibility: hidden;">*Campo obrigatório</span> -->
+		<!-- 	{/if} -->
+		<!-- </div> -->
 
 		<!-- TODO: Adicionar titulo 'Data de nascimento' -->
 		<div style="display:flex; flex-direction: column;">
-			<InputDate name="dtNasc" inputHandler={dtNascInputHandler} bind:value={dtNasc} />
+			<span style:color="var(--cor-secundaria)">Data de nascimento:</span>
+			<InputDatetime
+				id="inputDtInicioEtapa"
+				borded
+				bind:value={dtNasc}
+				name="dtEntregaMin"
+				max={dateNowFormated}
+			/>
 			{#if dtNascEmpty}
 				<span class="error" style="visibility: visible;">*Campo obrigatório</span>
 			{:else}
